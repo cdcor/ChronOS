@@ -1,0 +1,173 @@
+/* ----------
+   main.css
+   ---------- */
+
+/* ---------- General Elements ---------- */
+
+* 
+{
+    margin: auto;
+}
+
+body
+{
+    background-image: url('images/background.jpg');
+    background-repeat: repeat;
+    font-family: "Segoe UI Light", "Segoe UI", Tahoma, Arial, Verdana, sans-serif;
+    font-size: 12pt;
+    font-weight: normal;
+    font-style: normal;
+    color: #333;
+}
+
+textarea 
+{
+    background-image: url('images/background.jpg');
+    background-repeat: repeat;
+    border: 2px solid #666;
+}
+
+.background
+{
+    background-color: transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#backgroundCircuit
+{
+    background-image: url('images/background-circuit.png');
+    background-position: center;
+    background-repeat: repeat;
+}
+
+.separator-h 
+{
+    width: 1000px;
+    height: 2px;
+    background-image: url('images/separator-h.png');
+    background-repeat: repeat-y;
+}
+
+#mainContainer
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1000px;
+}
+
+/* ---------- The header/banner ---------- */
+
+#tableBanner
+{
+    padding: 0 12px;
+    width: 1000px;
+}
+
+#tableBanner tr td
+{
+    width: 333px;
+    vertical-align: bottom;
+}
+
+#banner
+{
+    width: 389px;
+    height: 100px;
+    text-align: center;
+}
+
+/* Status area */
+#statusBar
+{
+    text-align: right;
+    font-size: 11pt;
+}
+
+/* Buttons */
+
+.headerButton
+{
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    border: none;
+}
+
+#btnStartOS
+{
+    background-image: url('images/button-power.png');
+}
+
+#btnStartOS:hover
+{
+    background-image: url('images/button-power-hover.png');
+}
+
+#btnStartOS:disabled
+{
+    background-image: url('images/button-power-disabled.png');
+}
+
+#btnReset
+{
+    background-image: url('images/button-restart.png');
+}
+
+#btnReset:hover
+{
+    background-image: url('images/button-restart-hover.png');
+}
+
+#btnReset:disabled
+{
+    background-image: url('images/button-restart-disabled.png');
+}
+
+#btnHaltOS
+{
+    background-image: url('images/button-halt.png');
+}
+
+#btnHaltOS:hover
+{
+    background-image: url('images/button-halt-hover.png');
+}
+
+#btnHaltOS:disabled
+{
+    background-image: url('images/button-halt-disabled.png');
+}
+
+/* ---------- Main Content ---------- */
+
+#tableContent
+{
+    width: 900px;
+}
+
+#display
+{
+    background-image: url('images/background.jpg');
+    background-repeat: repeat;
+    border: 2px solid #666; 
+    cursor: default;
+}
+
+#log
+{
+    padding: 0 2px;
+    width: 390px;
+    height: 380px;
+    border: 2px solid #666;
+    overflow: scroll;
+    white-space: nowrap;
+}
+
+#programInput
+{
+    width: 390px;
+    height: 162px;
+}
