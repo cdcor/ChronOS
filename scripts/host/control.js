@@ -45,8 +45,8 @@ Control.init = function()
 
 Control.windowResized = function()
 {
-    $('#mainContainer').css('width', window.innerWidth);
-    DisplaySecret.resize();
+    //$('#mainContainer').css('width', window.innerWidth);
+    //DisplaySecret.resize();
 };
 
 Control.getCanvas = function()
