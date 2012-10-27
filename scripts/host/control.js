@@ -1,7 +1,7 @@
 /* ------------  
    control.js
 
-   Requires global.js.
+   Requires global.js, jquery-1.8.1.min.js, jquery-ui-1.8.23.custom.min.js.
    
    Routines for the hardware simulation, NOT for our client OS itself. In this manner, it's A LITTLE BIT like a hypervisor,
    in that the Document envorinment inside a browser is the "bare metal" (so to speak) for which we write code that
@@ -12,7 +12,7 @@
    DOM manipulation and JavaScript event handling, and so on.  (index.html is the only place for markup.)
    
    This code references page numbers in the text book: 
-   Operating System Concepts 8th editiion by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
+   Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
    ------------ */
   
 // Document Initialization
@@ -33,7 +33,11 @@ Control.init = function()
     $('#tableContent').hide();
     
     StatusBar.setStatus('Shutdown');
-     
+    
+    CpuDisplay.init();
+    MemoryDisplay.init();
+    
+    ProgramInput.init();
     DisplaySecret.init();
     
     Control.windowResized();
@@ -86,7 +90,7 @@ Control.hostStart = function(button)
         // Create and initialize the CPU
         _CPU = new Cpu();
         
-        // Then set the clock pulse simulation to call ?????????.
+        // Then set the clock pulse simulation.
         Control.hardwareClockId = setInterval(Control.clockPulse, CPU_CLOCK_INTERVAL);
         // Call the OS Kernel Bootstrap routine.
         Kernel.bootstrap();
@@ -104,8 +108,8 @@ Control.hostHalt = function(button)
         
     button.disabled = true;
     
-    Control.log("emergency halt", "host");
-    Control.log("Attempting Kernel shutdown.", "host");
+    Control.log("Emergency halt.", "Host");
+    Control.log("Attempting Kernel shutdown.", "Host");
     
     // Call the OS sutdown routine.
     Kernel.shutdown();
@@ -133,30 +137,44 @@ Control.hostReset = function(button)
     }
 };
 
-Control.hardwareClockId = -1;
+Control.hardwareClockId = null;
+Control.singleStep = false;
 
-Control.clockPulse = function()
+// Toggles the single step functionality
+Control.toggleSingleStep = function()
+{
+	if (Control.singleStep)
+	{
+		$("#chkbxSingleStep").css("background-image", "url('images/check-empty.png')");
+		if (Control.hardwareClockId == null)
+			Control.hardwareClockId = setInterval(Control.clockPulse, CPU_CLOCK_INTERVAL);
+	}
+	else
+	{
+		$("#chkbxSingleStep").css("background-image", "url('images/check-full.png')");
+	}
+	
+	Control.singleStep = !Control.singleStep;
+}
+
+Control.clockPulse = function(button)
 {
     // Increment the hardware (host) clock.
-   _OSclock++;
-   // Call the kernel clock pulse event handler.
-   Kernel.onCpuClockPulse();
-};
-
-//
-// Keyboard Interrupt, a HARDWARE Interrupt Request. (Pages 560-561)
-//
-Control.enableKeyboardInterrupt = function()
-{
-    // Listen for key presses (keydown, actually) in the document 
-    // and call the simulation processor, which will in turn call the 
-    // os interrupt handler.
-    document.addEventListener("keydown", Control.onKeypress, false);
-};
-
-Control.disableKeyboardInterrupt = function()
-{
-    document.removeEventListener("keydown", Control.onKeypress, false);
+   	_OSclock++;
+   	// Call the kernel clock pulse event handler.
+   	Kernel.onCpuClockPulse(button);
+   	
+   	// If the CPU is not executing, update the displays regardless of single step status.
+   	//   Else the CPU is executing, don't update if single step is enabled unless the single step
+   	//   button was pressed.
+   	// When this function is called by the interval, no button is passed in.
+   	if (!_CPU.isExecuting || !Control.singleStep || button != null)
+   	{
+	   	// Update the CPU display.
+	    CpuDisplay.update();
+	    // Update the memory display.
+	    MemoryDisplay.update();
+    }
 };
 
 Control.onKeypress = function(event)
@@ -170,4 +188,17 @@ Control.onKeypress = function(event)
         // Enqueue this interrupt on the kernal interrupt queue so that it gets to the Interrupt handler.
         Kernel.interruptQueue.enqueue(new Interrupt(KEYBOARD_IRQ, params));
     }
+};
+
+Control.enableKeyboardInterrupt = function()
+{
+    // Listen for key presses (keydown, actually) in the document 
+    // and call the simulation processor, which will in turn call the 
+    // os interrupt handler.
+    document.addEventListener("keydown", Control.onKeypress, false);
+};
+
+Control.disableKeyboardInterrupt = function()
+{
+    document.removeEventListener("keydown", Control.onKeypress, false);
 };

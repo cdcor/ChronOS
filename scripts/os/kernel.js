@@ -1,7 +1,7 @@
 /* ------------
    kernel.js
    
-   Requires globals.js
+   Requires globals.js, memoryManager.js
    
    Routines for the Operataing System, NOT the host.
    
@@ -15,17 +15,31 @@ Kernel.interruptQueue = null;
 Kernel.buffers = null;
 Kernel.inputQueue = null; 
 
+Kernel.memoryManager = null;
+
+Kernel.residentList = null;
+Kernel.readyQueue = null;
+Kernel.runningProcess = null;
+
 Kernel.keyboardDriver = null;
 
 // ---------- OS Startup and Shutdown Routines ----------
 
 Kernel.bootstrap = function() // Page 8.
 {
-    Control.log("bootstrap", "host");
+    Control.log("Bootstrap.", "Host");
     
+    // Queues and buffers.
     Kernel.interruptQueue = new Queue();
     Kernel.buffers = new Array();
     Kernel.inputQueue = new Queue();
+    
+    // Memory Manager
+    Kernel.memoryManager = new MemoryManager();
+    
+    // Process Lists/Queues
+    Kernel.residentList = new Array();
+    Kernel.readyQueue = new Queue();
     
     // Initialize the Console.
     _Console = new Console(Control.getCanvas());
@@ -67,14 +81,14 @@ Kernel.shutdown = function()
     StatusBar.setStatus("Shutdown");
 };
 
-Kernel.onCpuClockPulse = function()
+Kernel.onCpuClockPulse = function(button)
 {
     // This gets called from the host hardware every time there is a hardware clock pulse. 
     // This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
     // This, on the other hand, is the clock pulse from the hardware (or host) that tells the kernel 
     // that it has to look for interrupts and process them if it finds any.
     // Check for an interrupt, are any. Page 560
-    
+
     // Check for an interrupt, are any. Page 560
     if (Kernel.interruptQueue.getSize() > 0)
     {
@@ -83,7 +97,15 @@ Kernel.onCpuClockPulse = function()
     }
     else if (_CPU.isExecuting) // If there are no interrupts then run a CPU cycle if there is anything being processed.
     {
-        _CPU.cycle();
+    	// If single step is not enabled, cycle the CPU regularly.
+    	//   Else single step is enabled, only cycle when the step button is pressed
+    	//   (it is passed to this function when it is pressed)
+    	if (!Control.singleStep || button != null)
+        	_CPU.cycle();
+    }
+    else if (Kernel.readyQueue.getSize() > 0)
+    {
+    	Kernel.dispatchNextProcess();
     }
     else // If there are no interrupts and there is nothing being executed then just be idle.
     {
@@ -91,21 +113,108 @@ Kernel.onCpuClockPulse = function()
     }
 };
 
+// Loads the specified code into memory.
+Kernel.loadMemory = function(code)
+{
+    Kernel.trace("Loading program.");
+    
+    // Create new PCB for the program.
+    var pcb = new Pcb();
+    
+     // Allcate memory.
+    var isAllocated = Kernel.memoryManager.allocate(pcb);
+    
+    if (isAllocated)
+    {
+    	// Set relocation register.
+	    Kernel.memoryManager.setRelocationRegister(pcb);
+	    
+	    Kernel.trace("Loading code into memory. Base address: " + pcb.base);
+	    
+	    // Load into memory.
+	    codePieces = code.split(" ");
+	    
+	    for (var address = 0; address < codePieces.length; address++)
+	    {
+	    	try
+	    	{
+	    		Kernel.memoryManager.write(address, codePieces[address]);
+	    	}
+	    	catch(error)
+	    	{
+	    		Kernel.trace("Load failed: " + error);
+	    		_StdIn.putText("Load failed: " + error);
+	    		
+	    		Kernel.memoryManager.deallocate(pcb);
+	    		
+	    		return;
+	    	}
+	    }
+	    
+	    // Send the PID to the console.
+		_StdIn.putText("PID: " + pcb.pid);
+		MemoryDisplay.informNewData(pcb.base);
+		
+		// Place on resident list
+		Kernel.residentList[pcb.pid] = pcb;
+		pcb.status = "Resident";
+	}
+	else
+	{
+		_StdIn.putText("Not enough memory for process.");
+	}
+};
+
+// Runs the specified process (i.e. moves it from the resident list to the ready queue).
+Kernel.runProcess = function(pid)
+{
+	// Get the PCB.
+	var pcb = Kernel.residentList[pid];
+	
+	// Check if the PCB defines a valid process.
+	if (pcb != null)
+	{
+		Kernel.trace("Running process: " + pid);
+		// Place on the ready queue.
+		Kernel.readyQueue.enqueue(pcb);
+		pcb.status = "Ready";
+		// Remove from resident list.
+		Kernel.residentList[pid] = undefined;
+	}
+	else // Process does not exist.
+		_StdIn.putText("There is no process with that ID.");
+};
+
+// Dispatches the specified process to the CPU to be executed.
+Kernel.dispatchNextProcess = function()
+{
+	var pcb = Kernel.readyQueue.dequeue();
+	
+	Kernel.runningProcess = pcb;
+	
+	Kernel.memoryManager.setRelocationRegister(pcb);
+	_CPU.setRegisters(pcb);
+	_CPU.isExecuting = true;
+};
+
+// ---------- Interrupt servicing ----------
+
 Kernel.enableInterrupts = function()
 {
     // Keyboard
     Control.enableKeyboardInterrupt();
-    // More...
+    // More...?
 };
 
 Kernel.disableInterrupts = function()
 {
     // Keyboard
     Control.disableKeyboardInterrupt();
-    // More...
+    // More...?
 };
 
-Kernel.interruptHandler = function(irq, params)    // This is the Interrupt Handler Routine.  Page 8.
+// This is the Interrupt Handler Routine.  Page 8.
+Kernel.interruptHandler = function(irq, params)
 {
     // Trace our entrance here so we can compute Interrupt Latency by analyzing the log file later on.  Page 766.
     Kernel.trace("Handling IRQ~" + irq);
@@ -125,6 +234,14 @@ Kernel.interruptHandler = function(irq, params)    // This is the Interrupt Hand
             Kernel.keyboardDriver.isr(params);   // Kernel mode device driver
             _StdIn.handleInput();
             break;
+        case PROCESS_FAULT_IRQ:
+        	Kernel.processFaultIsr(params);
+        	break;
+        case PROCESS_TERMINATED_IRQ:
+        	Kernel.processTerminatedIsr();
+        case SYSTEM_CALL_IRQ:
+        	Kernel.systemCallIsr(params);
+        	break;
         default: 
             Kernel.trapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
     }
@@ -132,9 +249,58 @@ Kernel.interruptHandler = function(irq, params)    // This is the Interrupt Hand
     // 3. Restore the saved state.  TODO: Question: Should we restore the state via IRET in the ISR instead of here? p560.
 };
 
-Kernel.timerIsr = function()  // The built-in TIMER (not clock) Interrupt Service Routine (as opposed to an ISR coming from a device driver).
+// The built-in TIMER (not clock) Interrupt Service Routine (as opposed to an ISR coming from a device driver).
+Kernel.timerIsr = function()  
 {
-    // Check multiprogramming parameters and enfore quanta here. Call the scheduler / context switch here if necessary.
+    // Check multiprogramming parameters and enforce quanta here. Call the scheduler / context switch here if necessary.
+};
+
+// ISR for when a process performs an invalid action.
+Kernel.processFaultIsr = function(message)
+{	
+	var fullMessage = "Process aborted (PID " + Kernel.runningProcess.pid + ")" + (message != null ? ": " + message : ".");
+	Kernel.trace(fullMessage);
+	_StdIn.putText(fullMessage);
+	
+	// Stop CPU execution
+	_CPU.isExecuting = false;
+	_CPU.clearRegisters();
+	
+	// Move process back to resident list (since it's still in memory)
+	Kernel.residentList[Kernel.runningProcess.pid] = Kernel.runningProcess;
+	Kernel.runningProcess = null;
+};
+
+// ISR for when a process terminates.
+Kernel.processTerminatedIsr = function()
+{
+	Kernel.trace("Process completed (PID " + Kernel.runningProcess.pid + ").");
+	
+	// Stop CPU execution
+	_CPU.isExecuting = false;
+	_CPU.clearRegisters();
+	
+	// Remove process
+	Kernel.memoryManager.deallocate(Kernel.runningProcess);
+	Kernel.runningProcess = null;
+};
+
+Kernel.systemCallIsr = function(param)
+{
+	if (param == 1)
+		_StdIn.putText("" + _CPU.yReg.data);
+	else if (param == 2)
+	{
+		var address = _CPU.yReg.data;
+		var data = null;
+		
+		while (data !== 0)
+		{
+			data = Kernel.memoryManager.read(address);
+			_StdIn.putText(String.fromCharCode(data));
+			address++;
+		}
+	}
 };
 
 // ---------- OS Utility Routines ----------
@@ -146,7 +312,7 @@ Kernel.trace = function(message)
     {
         if (message === "Idle")
         {
-            // We can't log every idle clock pulse because it would lag the browser very quickly.
+            // Don't log every idle clock pulse.
             if (_OSclock % 10 == 0)  // Dependent on CPU_CLOCK_INTERVAL
                 Control.log(message, "OS");
         }
@@ -162,5 +328,6 @@ Kernel.trapError = function(message)
     // Show BSoD
     _StdIn.bsod();
 
-    Kernel.shutdown();
+	Control.hostHalt();
+    //Kernel.shutdown();
 };

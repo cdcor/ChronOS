@@ -113,6 +113,20 @@ Shell.prototype.init = function()
     sc.description = "- Produce an OS error to be trapped.";
     sc.funct = shellTrap;
     this.commandList[this.commandList.length] = sc;
+    
+    // load
+    sc = new ShellCommand();
+    sc.command = "load";
+    sc.description = "- Loads the machine code into memory.";
+    sc.funct = shellLoad;
+    this.commandList[this.commandList.length] = sc;
+    
+    // run
+    sc = new ShellCommand();
+    sc.command = "run";
+    sc.description = "<PID> (s) - Runs the specified process (single step).";
+    sc.funct = shellRunProcess;
+    this.commandList[this.commandList.length] = sc;
 
     // processes - list the running processes and their IDs
     // kill <id> - kills the specified process id.
@@ -180,18 +194,18 @@ Shell.prototype.handleInput = function(buffer)
 };
 
 
-Shell.prototype.parseInput = function (buffer)
+Shell.prototype.parseInput = function(buffer)
 {
     var retVal = new UserCommand();
     //
     // 1. Remove leading and trailing spaces.
     buffer = trim(buffer);
     // 2. Lower-case it.
-    buffer = buffer.toLowerCase();
+    //buffer = buffer.toLowerCase();
     // 3. Separate on spaces so we can determine the command and command-line args, if any.
     var tempList = buffer.split(" ");
     // 4. Take the first (zeroth) element and use that as the command.
-    var cmd = tempList.shift();  // Yes, you can do that to an array in Javascript.  See the Queue class.
+    var cmd = tempList.shift();
     // 4.1 Remove any left-over spaces.
     cmd = trim(cmd);
     // 4.2 Record it in the return value.
@@ -402,12 +416,10 @@ function shellStatus(args)
 {
     if (args.length > 0)
     {
-        {
         if (args[0].length > 20)
             _StdIn.putText("That status is too long.");
         else
             StatusBar.setStatus(args[0]);
-    }
     }
     else
         _StdIn.putText("Usage: status <string>  Please supply a string.");
@@ -426,7 +438,7 @@ function shellWhereAmI()
 
     hostipInfo = xmlhttp.responseText.split("\n");
 
-    for (i=0; hostipInfo.length >= i; i++) {
+    for (i = 0; hostipInfo.length >= i; i++) {
         ipAddress = hostipInfo[i].split(":");
         if (ipAddress[0] === "IP") 
         {
@@ -440,16 +452,44 @@ function shellWhereAmI()
 
 function shellRain()
 {
-    _StdIn.putText("  ><> ><> ><> ><> ><> ><>");
-    _DisplaySecret.animate();
+	_StdIn.putText("Temporarily disabled...");
+    //_StdIn.putText("  ><> ><> ><> ><> ><> ><>");
+    //DisplaySecret.animate();
 }
 
 function shellTrap()
 {
     // Create trap error.
     Kernel.trapError("MWAHAHAHA");
-    // Stop the JavaScript interval that's simulating our clock pulse.
-    clearInterval(Control.hardwareClockId);
     // Indicate to user what has happened.
     StatusBar.setStatus("BSoD");
+}
+
+function shellLoad()
+{
+	var input = ProgramInput.get();
+	
+	if (input == "")
+		_StdIn.putText("No program to load.");
+	else
+	{
+		_StdIn.putText("Loading program...");
+		_StdIn.advanceLine();
+		Kernel.loadMemory(input);
+	}
+}
+
+function shellRunProcess(args)
+{
+	if (args.length > 0)
+	{
+		var pid = parseInt(args[0])
+		
+		if (!isNaN(pid))
+			Kernel.runProcess(pid);
+		else
+			_StdIn.putText("That process ID is invalid.");
+	}
+	else
+		_StdIn.putText("Usage: run <PID>  Please supply a process ID.");
 }

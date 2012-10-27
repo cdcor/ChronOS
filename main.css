@@ -148,6 +148,7 @@ textarea
     width: 900px;
 }
 
+/* Shell */
 #display
 {
     background-image: url('images/background.jpg');
@@ -156,18 +157,105 @@ textarea
     cursor: default;
 }
 
+/* Utilities */
 #log
 {
     padding: 0 2px;
     width: 390px;
-    height: 380px;
+    height: 200px;
     border: 2px solid #666;
     overflow: scroll;
+    white-space: nowrap;
+    font-size: 11pt;
+}
+
+#cpuMemContainer
+{
+	vertical-align: top;
+}
+
+#cpuDisplay
+{
+	width: 112px;
+	height: 135px;
+	border: 2px solid #666;
+	border-collapse: collapse;
+}
+
+#cpuDisplay tr td
+{
+	padding-right: 5px;
+	border-bottom: 1px solid #666;
+	text-align: right;
+}
+
+#cpuDisplay tr td:last-of-type /* The last column. */
+{
+	width: 40px;
+}
+
+#cpuDisplay tr:last-of-type td /* The last row. */
+{
+	border: none;
+}
+
+.innerButton
+{
+	min-width: 22px;
+    height: 23px;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+}
+
+#chkbxSingleStep, #chkbxAutoscroll
+{
+	height: 27px;
+	background-image: url('images/check-empty.png');
+	background-position-y: center;
+	background-repeat: no-repeat;
+}
+
+#chkbxSingleStep:hover, #chkbxAutoscroll:hover
+{
+	cursor: pointer;
+	background-image: url('images/check-hover.png') !important;
+}
+
+#btnSingleStep
+{
+	border: 2px solid #666;
+	text-align: center;
+}
+
+#btnSingleStep:hover
+{
+	cursor: pointer;
+	background-color: #AAAAAA;
+}
+
+#btnSingleIcon
+{
+	background-image: url('images/button-ss.png');
+}
+
+#cpuMemSpacer
+{
+	width: 8px;
+}
+
+#memoryDisplay
+{
+	padding: 0 2px;
+	width: 252px;
+	height: 226px;
+	border: 2px solid #666;
+	overflow: scroll;
     white-space: nowrap;
 }
 
 #programInput
 {
     width: 390px;
-    height: 162px;
+    height: 75px;
 }

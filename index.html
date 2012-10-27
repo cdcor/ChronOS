@@ -22,20 +22,27 @@
     <!-- Host (Hardware Simulation) Routines -->
     <script type="text/javascript" src="scripts/host/displaySecret.js"></script>
     <script type="text/javascript" src="scripts/host/statusBar.js"></script>
-    <script type="text/javascript" src="scripts/host/log.js"></script>
-    <script type="text/javascript" src="scripts/host/programInput.js"></script>
     
     <script type="text/javascript" src="scripts/host/cpu.js"></script>
+    <script type="text/javascript" src="scripts/host/memory.js"></script>
     
     <script type="text/javascript" src="scripts/host/control.js"></script>
+    <script type="text/javascript" src="scripts/host/controlLog.js"></script>
+    <script type="text/javascript" src="scripts/host/controlCpuDisplay.js"></script>
+    <script type="text/javascript" src="scripts/host/controlMemoryDisplay.js"></script>
+    <script type="text/javascript" src="scripts/host/controlProgramInput.js"></script>
     
     <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
     <script type="text/javascript" src="scripts/os/canvastext.js"></script>
     <script type="text/javascript" src="scripts/os/console.js"></script>
     <script type="text/javascript" src="scripts/os/shell.js"></script>
+    
+    <script type="text/javascript" src="scripts/os/interrupt.js"></script>
     <script type="text/javascript" src="scripts/os/deviceDriver.js"></script>
     <script type="text/javascript" src="scripts/os/deviceDriverKeyboard.js"></script>
-    <script type="text/javascript" src="scripts/os/interrupt.js"></script>
+    
+    <script type="text/javascript" src="scripts/os/pcb.js"></script>
+    <script type="text/javascript" src="scripts/os/memoryManager.js"></script>
     <script type="text/javascript" src="scripts/os/kernel.js"></script>
 </head>
 
@@ -89,7 +96,8 @@
         <br />
         
         <!-- Main Content -->
-        <table id="tableContent" cellspacing=10px>
+        <table id="tableContent" 
+               cellspacing=10px>
             <tr>
                 <td>
                     <!-- The Shell -->
@@ -119,6 +127,77 @@
                             <td id="tdLog">
                                 <div id="log"></div>
                             </td>
+                        </tr>
+                        <!-- Memory/CPU display -->
+                        <tr>
+                        	<td>
+                        		<table>
+                        			<tr>
+                        				<td>CPU</td>
+                        				<td></td>
+                        				<td>Memory</td>
+                        			</tr>
+                        			<!-- Memory -->
+                        			<tr id="cpuMemContainer">
+                        				<td>
+                        					<table>
+                        						<tr>
+                        							<td>
+			                        					<table id="cpuDisplay">
+			                        						<tr>
+			                        							<td>PC</td>
+			                        							<td id="pcDisplay">0</td>
+			                        						</tr>
+			                        						<tr>
+			                        							<td>ACC</td>
+			                        							<td id="accDisplay">0</td>
+			                        						</tr>
+			                        						<tr>
+			                        							<td>X</td>
+			                        							<td id="xDisplay">0</td>
+			                        						</tr>
+			                        						<tr>
+			                        							<td>Y</td>
+			                        							<td id="yDisplay">0</td>
+			                        						</tr>
+			                        						<tr>
+			                        							<td>Z</td>
+			                        							<td id="zDisplay">0</td>
+			                        						</tr>
+			                        					</table>
+		                        					</td>
+	                        					</tr>
+	                        					<tr>
+                									<td id="chkbxAutoscroll"
+                									    onclick="MemoryDisplay.toggleAutoscroll()">
+                										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Autoscroll
+                									</td>
+                								</tr>
+	                        					<tr>
+                									<td id="chkbxSingleStep"
+                										onclick="Control.toggleSingleStep()">
+                										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Single Step
+                									</td>
+                								</tr>
+                								<tr>
+                									<td id="btnSingleStep"
+                										onclick="Control.clockPulse(this)">
+                										<div id="btnSingleIcon" class="innerButton">
+                											Step
+														</div>
+                									</td>
+                								</tr>
+                        					</table>
+                        				</td>
+                        				<td>
+                        					<div id="cpuMemSpacer"></div>
+                        				</td>
+                        				<td>
+                        					<div id="memoryDisplay"></div>
+                        				</td>
+                        			</tr>
+                        		</table>
+                        	</td>
                         </tr>
                         <!-- The Program Input -->
                         <tr>

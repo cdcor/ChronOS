@@ -1,5 +1,5 @@
 /* ----------
-   log.js
+   controlLog.js
    
    Requires globals.js.
    
@@ -8,21 +8,47 @@
   
 function Log() {}
 
+Log.lastMessage = "";
+Log.repeatedMessageCount = 1;
+
 // Adds the specified message to the log.
 Log.add = function(message, source, clock)
 {
-    if (source != null && clock != null)
-    {
-        var time = Log.getCurrentDateStamp();
-        message = '&nbsp;&nbsp;&nbsp;' +
-                  Log.applyStyle(time, '#666', null, '8pt') + '<br />' + 
-                  Log.applyStyle(clock, null, 'bold') + ' '+ 
-                  Log.applyStyle(source, 'blue', 'bold') + ' ' + 
-                  Log.applyMessageStyle(message);
-    }
-    
-    var newContents = message + '<br />' + $('#log').html();
-    $('#log').html(newContents.substr(0, MAX_LOG_SIZE));
+	var time = Log.getCurrentDateStamp();
+	
+	if (Log.lastMessage === message)
+	{
+        if (message != null && source != null && clock != null)
+	    {
+	        newMessage = '&nbsp;&nbsp;&nbsp;' +
+	                     Log.applyStyle(time, '#666', null, '8pt') + '<br />' + 
+	                     Log.applyStyle(clock, null, 'bold') + ' '+ 
+	                     Log.applyStyle(source, 'blue', 'bold') + ' ' + 
+	                     Log.applyStyle('[' + (++Log.repeatedMessageCount) + '] ', null, null, '10pt') + 
+	                     Log.applyMessageStyle(message);
+	    }
+        
+        var newContents = $('#log').html().replace(/(.*?<br>){2}/, newMessage + '<br />');
+        $('#log').html(newContents.substr(0, MAX_LOG_SIZE));
+	}
+	else
+	{
+		Log.repeatedMessageCount = 1;
+		
+	    if (message != null && source != null && clock != null)
+	    {
+	        newMessage = '&nbsp;&nbsp;&nbsp;' +
+	                     Log.applyStyle(time, '#666', null, '8pt') + '<br />' + 
+	                     Log.applyStyle(clock, null, 'bold') + ' '+ 
+	                     Log.applyStyle(source, 'blue', 'bold') + ' ' + 
+	                     Log.applyMessageStyle(message);
+	    }
+	    
+	    var newContents = newMessage + '<br />' + $('#log').html();
+	    $('#log').html(newContents.substr(0, MAX_LOG_SIZE));
+   }
+   
+   Log.lastMessage = message;
 };
 
 // Gets a date stamp appropriate for a log.
@@ -60,7 +86,7 @@ Log.applyMessageStyle = function(message)
 {
     if (message.search(/idle/i) != -1) // Idle shows up more often, so it's more efficient to find it first
         message = message;
-    else if (message.search(/shutdown/i) != -1)
+    else if (message.search(/(shutdown|failed|fault|abort)/i) != -1)
         message = Log.applyStyle(message, '#FF7700');
     else if (message.search(/(emergency|halt|error)/i) != -1)
         message = Log.applyStyle(message, 'red');

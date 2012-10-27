@@ -9,16 +9,28 @@
    ------------ */
   
 // ---------- Global Constants ----------
+
+// General
 var APP_NAME = "ChronOS";
 var APP_VERSION = "0.1";
 
 var MAX_LOG_SIZE = 5000; // in number of characters
 
+// Host stuff
 var CPU_CLOCK_INTERVAL = 100;   // in ms, or milliseconds, so 1000 = 1 second.
 
+var MEMORY_SIZE = 768; // In bytes
+var MEMORY_BLOCK_SIZE = 256; // Block of memory to assign to a process, ideally should be a factor of MEMORY_SIZE.
+
+var MEMORY_DISPLAY_ADDRESSES_PER_LINE = 6; // Addresses per line to display.
+
+// IRQs
 var TIMER_IRQ    = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority). 
                        // NOTE: The timer is different from hardware clock pulses. Don't confuse these.
 var KEYBOARD_IRQ = 1;
+var PROCESS_FAULT_IRQ = 2;
+var PROCESS_TERMINATED_IRQ = 3;
+var SYSTEM_CALL_IRQ = 4;
 
 // Console
 var DEFAULT_FONT = "sans";
@@ -35,11 +47,6 @@ var _Mode = 0; // 0 = Kernel Mode, 1 = User Mode.  See page 21.
 // Default the OS trace to be on.
 var _Trace = true;
 
-// OS queues
-var _KernelInterruptQueue = null;
-var _KernelBuffers = null;
-var _KernelInputQueue = null;
-
 // Standard input and output
 var _StdIn  = null;
 var _StdOut = null;
@@ -47,3 +54,6 @@ var _StdOut = null;
 // UI
 var _Console = null;
 var _OsShell = null;
+
+// At least this OS is not trying to kill you. (Yet.)
+var _SarcasticMode = false;
