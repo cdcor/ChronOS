@@ -96,8 +96,7 @@
         <br />
         
         <!-- Main Content -->
-        <table id="tableContent" 
-               cellspacing=10px>
+        <table id="tableContent">
             <tr>
                 <td>
                     <!-- The Shell -->
@@ -121,11 +120,17 @@
                     <table id="tableUtil">
                         <!-- The Log -->
                         <tr>
-                            <td>Log</td>
-                        </tr>
-                        <tr>
-                            <td id="tdLog">
-                                <div id="log"></div>
+                            <td>
+                            	<table>
+                            		<tr>
+                            			<td>Log</td>
+                            		</tr>
+                            		<tr>
+                            			<td>
+                            				<div id="log"></div>
+                            			</td>
+                            		</tr>
+                            	</table>
                             </td>
                         </tr>
                         <!-- Memory/CPU display -->
@@ -137,7 +142,7 @@
                         				<td></td>
                         				<td>Memory</td>
                         			</tr>
-                        			<!-- Memory -->
+                        			<!-- CPU -->
                         			<tr id="cpuMemContainer">
                         				<td>
                         					<table>
@@ -168,22 +173,26 @@
 		                        					</td>
 	                        					</tr>
 	                        					<tr>
-                									<td id="chkbxAutoscroll"
-                									    onclick="MemoryDisplay.toggleAutoscroll()">
-                										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Autoscroll
+                									<td>
+                										<div  id="chkbxAutoscroll"
+                									          onclick="MemoryDisplay.toggleAutoscroll()">
+                									    	Autoscroll
+                									    </div>
                 									</td>
                 								</tr>
 	                        					<tr>
-                									<td id="chkbxSingleStep"
-                										onclick="Control.toggleSingleStep()">
-                										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Single Step
+                									<td>
+                										<div id="chkbxSingleStep"
+                										     onclick="Control.toggleSingleStep()">
+                											Single Step
+                										</div>
                 									</td>
                 								</tr>
                 								<tr>
-                									<td id="btnSingleStep"
-                										onclick="Control.clockPulse(this)">
-                										<div id="btnSingleIcon" class="innerButton">
-                											Step
+                									<td>
+	                									<div id="btnSingleStep"
+	                										 onclick="Control.clockPulse(this)">
+	                										Step
 														</div>
                 									</td>
                 								</tr>
@@ -192,6 +201,7 @@
                         				<td>
                         					<div id="cpuMemSpacer"></div>
                         				</td>
+                        				<!-- Memory -->
                         				<td>
                         					<div id="memoryDisplay"></div>
                         				</td>

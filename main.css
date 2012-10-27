@@ -7,6 +7,7 @@
 * 
 {
     margin: auto;
+    padding: 0;
 }
 
 body
@@ -29,10 +30,10 @@ textarea
 
 .background
 {
-    background-color: transparent;
-    position: absolute;
+	position: absolute;
     top: 0;
     left: 0;
+    background-color: transparent;
 }
 
 #backgroundCircuit
@@ -62,8 +63,8 @@ textarea
 
 #tableBanner
 {
+	width: 1000px;
     padding: 0 12px;
-    width: 1000px;
 }
 
 #tableBanner tr td
@@ -146,6 +147,7 @@ textarea
 #tableContent
 {
     width: 900px;
+    border-spacing: 10px;
 }
 
 /* Shell */
@@ -172,10 +174,12 @@ textarea
 #cpuMemContainer
 {
 	vertical-align: top;
+	border-spacing: 2px;
 }
 
 #cpuDisplay
 {
+	margin-bottom: 3px;
 	width: 112px;
 	height: 135px;
 	border: 2px solid #666;
@@ -214,6 +218,7 @@ textarea
 	background-image: url('images/check-empty.png');
 	background-position-y: center;
 	background-repeat: no-repeat;
+	padding-left: 30px;
 }
 
 #chkbxSingleStep:hover, #chkbxAutoscroll:hover
@@ -224,6 +229,11 @@ textarea
 
 #btnSingleStep
 {
+	margin-top: 3px;
+	height: 23px;
+	background-image: url('images/button-ss.png');
+	background-position-x: 2px;
+	background-repeat: no-repeat;
 	border: 2px solid #666;
 	text-align: center;
 }
@@ -234,11 +244,6 @@ textarea
 	background-color: #AAAAAA;
 }
 
-#btnSingleIcon
-{
-	background-image: url('images/button-ss.png');
-}
-
 #cpuMemSpacer
 {
 	width: 8px;
@@ -246,9 +251,9 @@ textarea
 
 #memoryDisplay
 {
-	padding: 0 2px;
+	margin-top: 2px;
 	width: 252px;
-	height: 226px;
+	height: 224px;
 	border: 2px solid #666;
 	overflow: scroll;
     white-space: nowrap;

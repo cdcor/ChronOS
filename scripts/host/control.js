@@ -22,7 +22,9 @@ $(document).ready(function()
 });
 
 // When the windows is resized...
-$(window).resize(Control.windowResized);
+$(window).resize(function() {
+	//Control.windowResized();
+});
 
 function Control() {}
 
@@ -30,9 +32,9 @@ function Control() {}
 Control.init = function() 
 {
     // Set up the web stuff
-    $('#tableContent').hide();
+    $("#tableContent").hide();
     
-    StatusBar.setStatus('Shutdown');
+    StatusBar.setStatus("Shutdown");
     
     CpuDisplay.init();
     MemoryDisplay.init();
@@ -45,13 +47,13 @@ Control.init = function()
 
 Control.windowResized = function()
 {
-    $('#mainContainer').css('width', window.innerWidth);
+    $("#mainContainer").css("width", window.innerWidth);
     DisplaySecret.resize();
 };
 
 Control.getCanvas = function()
 {
-    return document.getElementById('display');
+    return $('#display')[0];
 };
 
 // Logs a message to the host's log.
