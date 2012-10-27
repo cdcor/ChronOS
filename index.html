@@ -96,134 +96,86 @@
         <br />
         
         <!-- Main Content -->
-        <table id="tableContent">
-            <tr>
-                <td>
-                    <!-- The Shell -->
-                    <table>
-                        <tr>
-                            <td>Shell</td>
-                        </tr>
-                        <tr>
-                            <td id="tdDisplay">
-                                <canvas id="display"
-                                        width="500px"
-                                        height="580px"
-                                        tabindex="3">
-                                </canvas>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-                <td>
-                    <!-- Everything else -->
-                    <table id="tableUtil">
-                        <!-- The Log -->
-                        <tr>
-                            <td>
-                            	<table>
-                            		<tr>
-                            			<td>Log</td>
-                            		</tr>
-                            		<tr>
-                            			<td>
-                            				<div id="log"></div>
-                            			</td>
-                            		</tr>
-                            	</table>
-                            </td>
-                        </tr>
-                        <!-- Memory/CPU display -->
-                        <tr>
-                        	<td>
-                        		<table>
-                        			<tr>
-                        				<td>CPU</td>
-                        				<td></td>
-                        				<td>Memory</td>
-                        			</tr>
-                        			<!-- CPU -->
-                        			<tr id="cpuMemContainer">
-                        				<td>
-                        					<table>
-                        						<tr>
-                        							<td>
-			                        					<table id="cpuDisplay">
-			                        						<tr>
-			                        							<td>PC</td>
-			                        							<td id="pcDisplay">0</td>
-			                        						</tr>
-			                        						<tr>
-			                        							<td>ACC</td>
-			                        							<td id="accDisplay">0</td>
-			                        						</tr>
-			                        						<tr>
-			                        							<td>X</td>
-			                        							<td id="xDisplay">0</td>
-			                        						</tr>
-			                        						<tr>
-			                        							<td>Y</td>
-			                        							<td id="yDisplay">0</td>
-			                        						</tr>
-			                        						<tr>
-			                        							<td>Z</td>
-			                        							<td id="zDisplay">0</td>
-			                        						</tr>
-			                        					</table>
-		                        					</td>
-	                        					</tr>
-	                        					<tr>
-                									<td>
-                										<div  id="chkbxAutoscroll"
-                									          onclick="MemoryDisplay.toggleAutoscroll()">
-                									    	Autoscroll
-                									    </div>
-                									</td>
-                								</tr>
-	                        					<tr>
-                									<td>
-                										<div id="chkbxSingleStep"
-                										     onclick="Control.toggleSingleStep()">
-                											Single Step
-                										</div>
-                									</td>
-                								</tr>
-                								<tr>
-                									<td>
-	                									<div id="btnSingleStep"
-	                										 onclick="Control.clockPulse(this)">
-	                										Step
-														</div>
-                									</td>
-                								</tr>
-                        					</table>
-                        				</td>
-                        				<td>
-                        					<div id="cpuMemSpacer"></div>
-                        				</td>
-                        				<!-- Memory -->
-                        				<td>
-                        					<div id="memoryDisplay"></div>
-                        				</td>
-                        			</tr>
-                        		</table>
-                        	</td>
-                        </tr>
-                        <!-- The Program Input -->
-                        <tr>
-                            <td>Program Input</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <textarea id="programInput"
-                                          onkeyup="ProgramInput.verify();">
-                                </textarea>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
+        <div id="mainContent">
+        	<!-- The shell -->
+        	<div class="container">
+        		<div>Shell</div>
+        		<div id="shellContainer">
+        			<canvas id="display"
+	                        width="500px"
+	                        height="580px"
+	                        tabindex="3">
+	                </canvas>
+        		</div>
+        	</div>
+        	<!-- Utilities -->
+        	<div id="utilsContainer" class="container">
+        		<!-- The Log -->
+        		<div>Log</div>
+        		<div id="log"></div>
+        		<!-- CPU Display -->
+        		<div id="cpuContainer">
+        			<div>CPU</div>
+        			<table id="cpuDisplay">
+						<tr>
+							<td>PC</td>
+							<td id="pcDisplay">0</td>
+						</tr>
+						<tr>
+							<td>ACC</td>
+							<td id="accDisplay">0</td>
+						</tr>
+						<tr>
+							<td>X</td>
+							<td id="xDisplay">0</td>
+						</tr>
+						<tr>
+							<td>Y</td>
+							<td id="yDisplay">0</td>
+						</tr>
+						<tr>
+							<td>Z</td>
+							<td id="zDisplay">0</td>
+						</tr>
+					</table>
+					<div id="chkbxAutoscroll"
+					     onclick="MemoryDisplay.toggleAutoscroll()">
+					    Autoscroll
+					</div>
+					<div id="chkbxSingleStep"
+                		 onclick="Control.toggleSingleStep()">
+                		Single Step
+                	</div>
+                	<div id="btnSingleStep"
+                		 onclick="Control.clockPulse(this)">
+                		Step
+                	</div>
+        		</div>
+        		<!-- Memory Display -->
+        		<div id="memoryContainer">
+        			<div>Memory</div>
+        			<div id="memoryDisplay"></div>
+        		</div>
+        		<!-- Program Input -->
+        		<div id="programInputContainer">
+	        		<div>Program Input</div>
+	        		<div id="programInputSubContainer">
+	        			<textarea id="programInput"
+		                          onkeyup="ProgramInput.verify()"
+		                          onfocusin="ProgramInput.expand()"
+		                          onfocusout="ProgramInput.restore()">
+		                </textarea>
+	        		</div>
+        		</div>
+        		<!-- Ready Queue -->
+        		<div id="readyQueueContainer">
+        			<div>Ready Queue</div>
+        			<div id="readyQueueDisplay">
+        				
+        			</div>
+        		</div>
+        	</div>
+        </div>
     </div>
 </body>
 
