@@ -21,18 +21,13 @@ $(document).ready(function()
     Control.init();
 });
 
-// When the windows is resized...
-$(window).resize(function() {
-	//Control.windowResized();
-});
-
 function Control() {}
 
 // Initializes the necessary elements to simulate the virtual machine in the browser.
 Control.init = function() 
 {
     // Set up the web stuff
-    $("#tableContent").hide();
+    $("#mainContent").hide();
     
     StatusBar.setStatus("Shutdown");
     
@@ -41,13 +36,6 @@ Control.init = function()
     
     ProgramInput.init();
     DisplaySecret.init();
-    
-    Control.windowResized();
-};
-
-Control.windowResized = function()
-{
-	
 };
 
 Control.getCanvas = function()
@@ -80,7 +68,7 @@ Control.hostStart = function(button)
     
         // Start starting animation
         StatusBar.setStatus("Starting...");
-        $('#tableContent').fadeIn(500, Control.hostStart);
+        $('#mainContent').fadeIn(500, Control.hostStart);
     }
     else // This function is calling the second part of this function after the animation.
     {
@@ -129,7 +117,7 @@ Control.hostReset = function(button)
     if (button)
     {
         StatusBar.setStatus("Shutting down...");
-        $('#tableContent').fadeOut(500, Control.hostReset);
+        $('#mainContent').fadeOut(500, Control.hostReset);
     }
     else
     {
