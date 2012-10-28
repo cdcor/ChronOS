@@ -8,15 +8,22 @@
   
 function MemoryDisplay() {}
 
+MemoryDisplay.display = null;
+
 MemoryDisplay.autoscroll = false;
 
-// Initializes memory display
+/**
+ * Initializes memory display.
+ */ 
 MemoryDisplay.init = function()
 {
+	MemoryDisplay.display = $("#memoryDisplay");
 	MemoryDisplay.toggleAutoscroll();
 };
 
-// Updates the memory display with the current contents of memory.
+/**
+ * Updates the memory display with the current contents of memory.
+ */
 MemoryDisplay.update = function()
 {
 	if (Kernel.memoryManager == null)
@@ -55,7 +62,7 @@ MemoryDisplay.update = function()
 	displayData = displayData.replace("<br>", "") + "</pre>";
 	
 	// Update div with new contents
-	$('#memoryDisplay').html(displayData);
+	MemoryDisplay.display.html(displayData);
 	
 	if (earliestChangedAddress === MEMORY_SIZE)
 		earliestChangedAddress = 0;
@@ -66,7 +73,13 @@ MemoryDisplay.update = function()
 	Kernel.memoryManager.resetDisplayContents();
 };
 
-// Formats the given address (a number) to a representation appropriate for the display.
+/**
+ * Formats the given address to a representation appropriate for the display.
+ * 
+ * @param {Number} address the address to format
+ * 
+ * @return {String} the formatted address
+ */ 
 MemoryDisplay.formatAddress = function(address)
 {
 	// Convert to base 16.
@@ -78,7 +91,13 @@ MemoryDisplay.formatAddress = function(address)
 	return "0x" + displayAddress;
 };
 
-// Formats the given data (a number) to a representation appropriate for the display.
+/**
+ * Formats the given data to a representation appropriate for the display.
+ *  
+ * @param {Number} data the data to format
+ * 
+ * @return {String} the formatted data
+ */
 MemoryDisplay.formatData = function(data)
 {
 	// Convert to base 16.
@@ -87,20 +106,27 @@ MemoryDisplay.formatData = function(data)
 	return displayData.length === 1 ? "0" + displayData : displayData;
 };
 
-// Scrolls the display to the given address.
+/**
+ * Scrolls the display to the given address.
+ * 
+ * @param {Number} address the address to scroll to
+ * @param {Number} speed (optional) the speed at which to animate the scroll
+ */ 
 MemoryDisplay.scrollTo = function(address, speed)
 {
-	if (speed == null || speed == 0)
-		$("#memoryDisplay")[0].scrollTop = 18 * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE);
+	if (!speed)
+		MemoryDisplay.display[0].scrollTop = 18 * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE);
 	else
 	{
-		$("#memoryDisplay").animate({
+		MemoryDisplay.display.animate({
 			scrollTop: 18 * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE)
 		}, speed, "easeOutQuad");
 	}
 };
 
-// Toggles autoscrolling of the display on each update
+/**
+ * Toggles autoscrolling of the display on each update.
+ */ 
 MemoryDisplay.toggleAutoscroll = function()
 {
 	if (MemoryDisplay.autoscroll)

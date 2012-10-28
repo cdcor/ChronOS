@@ -29,7 +29,11 @@ function Cpu()
     this.isExecuting = false;
 }
 
-// Sets the registers of this CPU based on the registers of the specified PCB.
+/**
+ * Sets the registers of this CPU based on the contents of the specified PCB.
+ * 
+ * @param {Pcb} pcb the PCB.
+ */
 Cpu.prototype.setRegisters = function(pcb)
 {
 	this.pc.write(pcb.pc);
@@ -38,7 +42,9 @@ Cpu.prototype.setRegisters = function(pcb)
 	this.zFlag.write(pcb.zFlag);
 };
 
-// Sets the registers of this CPU to 0.
+/**
+ * Sets the registers of this CPU to 0.
+ */
 Cpu.prototype.clearRegisters = function()
 {
 	this.pc.write(0);
@@ -48,7 +54,9 @@ Cpu.prototype.clearRegisters = function()
 	this.zFlag.write(0);
 };
 
-// The main CPU cycle to be executed every clock pulse.
+/**
+ * The main CPU cycle to be executed every clock pulse.
+ */
 Cpu.prototype.cycle = function()
 {
     Kernel.trace("CPU cycle.");
@@ -61,6 +69,9 @@ Cpu.prototype.cycle = function()
 
 // ---------- CPU Cycle steps ----------
 
+/**
+ * Fetches the next instruction from memory and increments the PC or faults if the fetch fails.
+ */
 Cpu.prototype.fetch = function()
 {
 	try
@@ -74,11 +85,17 @@ Cpu.prototype.fetch = function()
 	}
 };
 
+/**
+ * "Decodes" the instruction in the instruction register.
+ */
 Cpu.prototype.decode = function()
 {
 	this.op = this.opCodes[this.ir];
 };
 
+/**
+ * Executes the decoded instruction or faults if the instruction is invalid.
+ */
 Cpu.prototype.execute = function()
 {
 	if (this.op == null)
@@ -89,6 +106,11 @@ Cpu.prototype.execute = function()
 
 // ---------- Interrupt ----------
 
+/**
+ * Equeues a new interrupt in the case of the CPU fault.
+ * 
+ * @param {String} message a descript of why the fault occurred
+ */
 Cpu.prototype.fault = function(message)
 {
 	Kernel.interruptQueue.enqueue(new Interrupt(PROCESS_FAULT_IRQ, message));
@@ -138,7 +160,8 @@ Cpu.prototype.loadYRegFromMemory = function() // AC
 
 Cpu.prototype.noOperation = function() // EA
 {
-	// Do nothing
+	// Do nothing - this function must still exist however, otherwise the CPU will see the
+	//   opcode "EA" as an invalid instruction and cause a fault.
 };
 
 Cpu.prototype.breakOp = function() // 00
@@ -181,8 +204,11 @@ Cpu.prototype.systemCall = function() // FF
 	}
 };
 
-Cpu.prototype.opCodes = 
-{
+/**
+ * The CPU's opcodes. Opcodes located in this map and having a valid associating function will be 
+ * seen as valid. Note this map must be placed after the operation functions.
+ */
+Cpu.prototype.opCodes = {
 	0xA9 : Cpu.prototype.loadAccWithConstant,
 	0xAD : Cpu.prototype.loadAccFromMemory,
 	0x8D : Cpu.prototype.storeAccInMemory,
@@ -201,10 +227,15 @@ Cpu.prototype.opCodes =
 
 // ---------- Helper functions ----------
 
-// Returns the next specified number of values in memory according to the PC as a number.
-// For 2 argument operations, this will convert the 2 arguments to one number.
-// E.g. If 03 00 are the next 2 values after a load from memory for example, this will
-//      return 0x0003 or 3 as an integer.
+/**
+ * Returns the next specified number of values in memory according to the PC as a number.
+ * For 2 argument operations, this will convert the 2 arguments to one number.
+ * 
+ * E.g. If 03 00 are the next 2 values after a load from memory for example, this will
+ *   return 0x0003 or 3 as an integer.
+ * 
+ * @param {Number} numValues the number of values to read (1 or 2)
+ */
 Cpu.prototype.readFromMemory = function(numValues)
 {
 	if (numValues == 1)
@@ -230,7 +261,13 @@ Cpu.prototype.readFromMemory = function(numValues)
 // Helper map to invert the bits of a binary number
 Cpu.inversionMap = { 0 : 1, 1 : 0 };
 
-// Converts the given number (an 8-bit integer) in two's complement to its decimal form.
+/**
+ * Converts the given number (an 8-bit integer) in two's complement to its decimal form.
+ * 
+ * @param {Number} twosComplement the two's complement number
+ * 
+ * @return {Number} the decimal number
+ */
 Cpu.toDecimal = function(twosComplement)
 {
 	if (twosComplement > 127)
@@ -252,7 +289,13 @@ Cpu.toDecimal = function(twosComplement)
 	}
 };
 
-// Converts the given number in decimal to two's complement representaion.
+/**
+ * Converts the given number in decimal to its two's complement representaion.
+ * 
+ * @param {Number} decimal the decimal number to convert
+ * 
+ * @return {Number} the two's complement number
+ */
 Cpu.toTwosComplement = function(decimal)
 {
 	if (decimal < 0)
@@ -278,7 +321,9 @@ Cpu.toTwosComplement = function(decimal)
 	}
 };
 
-// Sets the statuses of all the registers of this CPU to normal. (For display purposes).
+/**
+ * Sets the statuses of all the registers of this CPU to normal. (For display purposes).
+ */
 Cpu.prototype.resetDisplayContents = function()
 {
 	this.pc.status = Register.STATUS_NORMAL;
@@ -292,7 +337,9 @@ Register.STATUS_NORMAL = 0;
 Register.STATUS_READ = 1;
 Register.STATUS_WRITTEN = 2;
 
-// Defines a register which holds the register's current value and status.
+/**
+ * Defines a register which holds the register's current value and status.
+ */
 function Register()
 {
 	// The current value
@@ -301,21 +348,33 @@ function Register()
 	this.status = Register.STATUS_NORMAL;
 }
 
-// Returns the register's current value.
+/**
+ * Returns the register's current value.
+ * 
+ * @return {Number} the register's current value
+ */
 Register.prototype.read = function()
 {
 	this.status = Register.STATUS_READ;
 	return this.data;
 };
 
-// Writes the specified data to the register.
+/**
+ * Writes the specified data to the register.
+ * 
+ * @param {Number} data the data to write
+ */
 Register.prototype.write = function(data)
 {
 	this.status = Register.STATUS_WRITTEN;
 	this.data = data;
 };
 
-// Increments the value held by the register by the specified amount.
+/**
+ * Increments the value held by the register by the specified amount.
+ * 
+ * @param {Number} amount the amount to increment
+ */
 Register.prototype.increment = function(amount)
 {
 	this.status = Register.STATUS_WRITTEN;
@@ -324,4 +383,4 @@ Register.prototype.increment = function(amount)
 		amount = 1;
 	
 	this.data += amount;
-}
+};

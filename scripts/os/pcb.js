@@ -40,7 +40,7 @@ Pcb.prototype.setRegisters = function(cpu)
  * @param {Boolean} html (optional) true if the string should be formatted for insertion into an 
  *        html document.
  * 
- * @return a string representation of this PCB
+ * @return {String} a string representation of this PCB
  */
 Pcb.prototype.toString = function(html)
 {
@@ -49,7 +49,7 @@ Pcb.prototype.toString = function(html)
 	var interChar = html ? ":" : ":";
 	var spaceChar = html ? "&nbsp;&nbsp;" : " ";
 	
-	return this.pid + spaceChar + "[ PC" + interChar + this.pc + spaceChar + "X" + interChar + 
-			this.xReg + spaceChar + "Y" + interChar + this.yReg + spaceChar + "Z" + interChar + 
-			this.zFlag + spaceChar + "Page" + interChar + page + " ]";
+	return "[ PID" + interChar + this.pid + spaceChar + "PC" + interChar + this.pc + spaceChar + 
+			"X" + interChar + this.xReg + spaceChar + "Y" + interChar + this.yReg + spaceChar + 
+			"Z" + interChar + this.zFlag + spaceChar + "Page" + interChar + page + " ]";
 };
