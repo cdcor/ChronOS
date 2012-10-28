@@ -6,12 +6,11 @@
 
 function Pcb()
 {
-    // Properties
     this.pid   = Pcb.lastPid++; // Process ID
     this.pc    = 0;  // Program Counter
     this.xReg  = 0;  // X register
     this.yReg  = 0;  // Y register
-    this.zFlag = 0;  // Z-ero flag (Think of it as "isZero".)
+    this.zFlag = 0;  // Z-ero flag (Think of it as "isZero")
     
     this.status = "New";
     
@@ -22,11 +21,35 @@ function Pcb()
 
 Pcb.lastPid = 0;
 
-// Sets the registers of this PCB based on the registers of the specified CPU.
+/**
+ * Sets the registers of this PCB based on the registers of the specified CPU.
+ * 
+ * @param {Object} cpu the CPU 
+ */
 Pcb.prototype.setRegisters = function(cpu)
 {
-	this.pc = cpu.pc;
-	this.xReg = cpu.xReg;
-	this.yReg = cpu.yReg;
-	this.zFlag = cpu.zFlag;
+	this.pc = cpu.pc.data;
+	this.xReg = cpu.xReg.data;
+	this.yReg = cpu.yReg.data;
+	this.zFlag = cpu.zFlag.data;
+};
+
+/**
+ * Returns a string representation of this PCB. 
+ * 
+ * @param {Boolean} html (optional) true if the string should be formatted for insertion into an 
+ *        html document.
+ * 
+ * @return a string representation of this PCB
+ */
+Pcb.prototype.toString = function(html)
+{
+	var page = Math.floor(this.base / MEMORY_BLOCK_SIZE);
+	
+	var interChar = html ? ":" : ":";
+	var spaceChar = html ? "&nbsp;&nbsp;" : " ";
+	
+	return this.pid + spaceChar + "[ PC" + interChar + this.pc + spaceChar + "X" + interChar + 
+			this.xReg + spaceChar + "Y" + interChar + this.yReg + spaceChar + "Z" + interChar + 
+			this.zFlag + spaceChar + "Page" + interChar + page + " ]";
 };

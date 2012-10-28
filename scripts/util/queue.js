@@ -9,42 +9,65 @@
    
 function Queue()
 {
-    // Properties
-    this.q = new Array();
+    this.queue = new Array();
+}
 
-    // Methods
-    this.getSize  = function()
-    {
-        return this.q.length;    
-    }
+/**
+ * Returns the size of the queue.
+ * 
+ * @return {Number} the size of the queue
+ */
+Queue.prototype.size = function()
+{
+    return this.queue.length;
+}
 
-    this.isEmpty  = function()
-    {
-        return (this.q.length == 0);    
-    }
+/**
+ * Returns true if the queue is empty.
+ * 
+ * @return {Boolean} true if the queue is empty, false otherwise
+ */
+Queue.prototype.isEmpty = function()
+{
+    return (this.queue.length == 0);    
+}
 
-    this.enqueue  = function(element)
-    {
-        this.q.push(element);        
-    }
-    
-    this.dequeue  = function()
-    {
-        var retVal = null;
-        if (this.q.length > 0)
-        {
-            retVal = this.q.shift();
-        }
-        return retVal;        
-    }
-    
-    this.toString = function()
-    {
-        retVal = "";
-        for (i in this.q)
-        {
-            retVal += "[" + this.q[i] + "] ";
-        }
-        return retVal;
-    }    
+/**
+ * Adds the specified element to the end of the queue.
+ * 
+ * @param {Object} element the element to add
+ */
+Queue.prototype.enqueue = function(element)
+{
+    this.queue.push(element);        
+}
+
+/**
+ * Removes and returns the next element from the front of the queue.
+ * 
+ * @return {Object} the next element from the queue
+ */
+Queue.prototype.dequeue = function()
+{
+    return this.queue.shift();        
+}
+
+/**
+ * Return the contents of this queue as an array.
+ * 
+ * @return {Array} the contents of this queue
+ */
+Queue.prototype.getContents = function()
+{
+	return this.queue;
+}
+
+/**
+ * Returns a string representation of this queue.
+ * 
+ * @return {String} a string representation of this queue
+ */
+Queue.prototype.toString = function()
+{
+    return this.queue.toString();
 }

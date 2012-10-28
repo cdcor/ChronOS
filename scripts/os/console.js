@@ -46,7 +46,7 @@ Console.prototype.resetXY = function()
 
 Console.prototype.handleInput = function()
 {
-    while (Kernel.inputQueue.getSize() > 0)
+    while (Kernel.inputQueue.size() > 0)
     {
         // Get the next character from the kernel input queue.
         var chr = Kernel.inputQueue.dequeue();

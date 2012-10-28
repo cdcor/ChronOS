@@ -87,13 +87,6 @@ MemoryDisplay.formatData = function(data)
 	return displayData.length === 1 ? "0" + displayData : displayData;
 };
 
-// Starts a visual cue to inform the user that memory has been changed.
-MemoryDisplay.informNewData = function(address)
-{
-	//MemoryDisplay.scrollTo(address, 1000);
-	MemoryDisplay.highlightBorder("#0000FF");
-};
-
 // Scrolls the display to the given address.
 MemoryDisplay.scrollTo = function(address, speed)
 {
@@ -105,15 +98,6 @@ MemoryDisplay.scrollTo = function(address, speed)
 			scrollTop: 18 * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE)
 		}, speed, "easeOutQuad");
 	}
-};
-
-// Highlights the display's border for a few seconds
-MemoryDisplay.highlightBorder = function(color)
-{
-	$("#memoryDisplay").css("border-color", color);
-	$("#memoryDisplay").animate({
-		borderColor: "#666"
-	}, 1000);
 };
 
 // Toggles autoscrolling of the display on each update

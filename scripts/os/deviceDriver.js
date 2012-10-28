@@ -10,7 +10,7 @@ function DeviceDriver()
     this.version = "0.07";
     this.status = "unloaded";
     this.preemptable = false;
-    // this.queue = new Queue();     // TODO: We will eventually want a queue for, well, queueing requests for this device to be handled by deferred proceedure calls (DPCs).
+    // this.queue = [];     // TODO: We will eventually want a queue for, well, queueing requests for this device to be handled by deferred proceedure calls (DPCs).
 }
 
 // Base Method pointers.

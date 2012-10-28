@@ -23,7 +23,9 @@ $(document).ready(function()
 
 function Control() {}
 
-// Initializes the necessary elements to simulate the virtual machine in the browser.
+/**
+ * Initializes the necessary elements to simulate the virtual machine in the browser.
+ */
 Control.init = function() 
 {
     // Set up the web stuff
@@ -33,17 +35,26 @@ Control.init = function()
     
     CpuDisplay.init();
     MemoryDisplay.init();
+    ReadyQueueDisplay.init();
     
     ProgramInput.init();
     DisplaySecret.init();
 };
 
+/**
+ * Returns the OS's canvas element (to imitate the shell). 
+ */
 Control.getCanvas = function()
 {
     return $('#display')[0];
 };
 
-// Logs a message to the host's log.
+/**
+ * Logs a message to the host's log. 
+ * 
+ * @param {String} message the message to log
+ * @param {String} source (optional) the messages source
+ */
 Control.log = function(message, source)
 {
     // Check the source.
@@ -58,10 +69,14 @@ Control.log = function(message, source)
     // Optionally udpate a log database or some streaming service.
 };
 
-// Simulates starting the machine given the start "button."
+/**
+ * Simulates starting the machine given the start "button."
+ * 
+ * @param {Object} button the button calling this function
+ */
 Control.hostStart = function(button)
 {
-    if (button) // The button called this function
+    if (button) // The button that called this function
     {
         // Disable the start button...
         button.disabled = true;
@@ -89,7 +104,11 @@ Control.hostStart = function(button)
     }
 };
 
-// Simulates halting the machine given the halt "button."
+/**
+ * Simulates halting the machine given the halt "button." 
+ * 
+ * @param {Object} button the button calling this function
+ */
 Control.hostHalt = function(button)
 {
     if (!button)
@@ -111,7 +130,11 @@ Control.hostHalt = function(button)
     StatusBar.setStatus("Halted");
 };
 
-// Simulates reseting the machine given the reset "button."
+/**
+ * Simulates reseting the machine given the reset "button."
+ *  
+ * @param {Object} button the button calling this function
+ */
 Control.hostReset = function(button)
 {
     if (button)
@@ -129,7 +152,9 @@ Control.hostReset = function(button)
 Control.hardwareClockId = null;
 Control.singleStep = false;
 
-// Toggles the single step functionality
+/**
+ * Toggles the single step functionality. 
+ */
 Control.toggleSingleStep = function()
 {
 	if (Control.singleStep)
@@ -146,6 +171,13 @@ Control.toggleSingleStep = function()
 	Control.singleStep = !Control.singleStep;
 }
 
+/**
+ * Simulates a clock pulse initiated by the host. 
+ * 
+ * @param {Object} button (optional) the button calling this function. This parameter is used to
+ *     identify a pulse initiated by the single step button as opposed to the hardware clock, which 
+ *     does not effect a CPU cycle when single step is enabled.    
+ */
 Control.clockPulse = function(button)
 {
     // Increment the hardware (host) clock.
@@ -156,13 +188,12 @@ Control.clockPulse = function(button)
    	// If the CPU is not executing, update the displays regardless of single step status.
    	//   Else the CPU is executing, don't update if single step is enabled unless the single step
    	//   button was pressed.
-   	// When this function is called by the interval, no button is passed in.
+   	// When this function is called by the clock interval, no button is passed in.
    	if (!_CPU.isExecuting || !Control.singleStep || button != null)
    	{
-	   	// Update the CPU display.
 	    CpuDisplay.update();
-	    // Update the memory display.
 	    MemoryDisplay.update();
+	    ReadyQueueDisplay.update();
     }
 };
 

@@ -30,6 +30,7 @@
     <script type="text/javascript" src="scripts/host/controlLog.js"></script>
     <script type="text/javascript" src="scripts/host/controlCpuDisplay.js"></script>
     <script type="text/javascript" src="scripts/host/controlMemoryDisplay.js"></script>
+    <script type="text/javascript" src="scripts/host/controlReadyQueueDisplay.js"></script>
     <script type="text/javascript" src="scripts/host/controlProgramInput.js"></script>
     
     <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
@@ -116,28 +117,30 @@
         		<!-- CPU Display -->
         		<div id="cpuContainer">
         			<div>CPU</div>
-        			<table id="cpuDisplay">
-						<tr>
-							<td>PC</td>
-							<td id="pcDisplay">0</td>
-						</tr>
-						<tr>
-							<td>ACC</td>
-							<td id="accDisplay">0</td>
-						</tr>
-						<tr>
-							<td>X</td>
-							<td id="xDisplay">0</td>
-						</tr>
-						<tr>
-							<td>Y</td>
-							<td id="yDisplay">0</td>
-						</tr>
-						<tr>
-							<td>Z</td>
-							<td id="zDisplay">0</td>
-						</tr>
-					</table>
+        			<div>
+        				<table id="cpuDisplay">
+							<tr>
+								<td>PC</td>
+								<td id="pcDisplay">0</td>
+							</tr>
+							<tr>
+								<td>ACC</td>
+								<td id="accDisplay">0</td>
+							</tr>
+							<tr>
+								<td>X</td>
+								<td id="xDisplay">0</td>
+							</tr>
+							<tr>
+								<td>Y</td>
+								<td id="yDisplay">0</td>
+							</tr>
+							<tr>
+								<td>Z</td>
+								<td id="zDisplay">0</td>
+							</tr>
+						</table>
+        			</div>
 					<div id="chkbxAutoscroll"
 					     onclick="MemoryDisplay.toggleAutoscroll()">
 					    Autoscroll
@@ -148,7 +151,7 @@
                 	</div>
                 	<div id="btnSingleStep"
                 		 onclick="Control.clockPulse(this)">
-                		Step
+                		<img src="images/button-ss.png" />&nbsp;Step
                 	</div>
         		</div>
         		<!-- Memory Display -->
@@ -162,8 +165,8 @@
 	        		<div id="programInputSubContainer">
 	        			<textarea id="programInput"
 		                          onkeyup="ProgramInput.verify()"
-		                          onfocusin="ProgramInput.expand()"
-		                          onfocusout="ProgramInput.restore()">
+		                          onfocus="ProgramInput.expand()"
+		                          onblur="ProgramInput.restore()">
 		                </textarea>
 	        		</div>
         		</div>

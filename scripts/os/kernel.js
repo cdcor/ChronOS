@@ -90,12 +90,13 @@ Kernel.onCpuClockPulse = function(button)
     // Check for an interrupt, are any. Page 560
 
     // Check for an interrupt, are any. Page 560
-    if (Kernel.interruptQueue.getSize() > 0)
+    if (Kernel.interruptQueue.size() > 0)
     {
         var interrupt = Kernel.interruptQueue.dequeue();
         Kernel.interruptHandler(interrupt.irq, interrupt.params); 
     }
-    else if (_CPU.isExecuting) // If there are no interrupts then run a CPU cycle if there is anything being processed.
+    // If there are no interrupts then run a CPU cycle if there is anything being processed.
+    else if (_CPU.isExecuting) 
     {
     	// If single step is not enabled, cycle the CPU regularly.
     	//   Else single step is enabled, only cycle when the step button is pressed
@@ -103,7 +104,7 @@ Kernel.onCpuClockPulse = function(button)
     	if (!Control.singleStep || button != null)
         	_CPU.cycle();
     }
-    else if (Kernel.readyQueue.getSize() > 0)
+    else if (Kernel.readyQueue.size() > 0)
     {
     	Kernel.dispatchNextProcess();
     }
@@ -153,7 +154,6 @@ Kernel.loadMemory = function(code)
 	    
 	    // Send the PID to the console.
 		_StdIn.putText("PID: " + pcb.pid);
-		MemoryDisplay.informNewData(pcb.base);
 		
 		// Place on resident list
 		Kernel.residentList[pcb.pid] = pcb;
