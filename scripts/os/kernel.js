@@ -59,6 +59,7 @@ Kernel.bootstrap = function() // Page 8.
     // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
     Kernel.trace("Enabling the interrupts.");
     Kernel.enableInterrupts();
+    
     // Launch the shell.
     Kernel.trace("Creating and launching the shell.");
     _OsShell = new Shell();
@@ -81,7 +82,7 @@ Kernel.shutdown = function()
     StatusBar.setStatus("Shutdown");
 };
 
-Kernel.onCpuClockPulse = function(button)
+Kernel.onCpuClockPulse = function(step)
 {
     // This gets called from the host hardware every time there is a hardware clock pulse. 
     // This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
@@ -95,6 +96,11 @@ Kernel.onCpuClockPulse = function(button)
         var interrupt = Kernel.interruptQueue.dequeue();
         Kernel.interruptHandler(interrupt.irq, interrupt.params); 
     }
+    else if (_CPU.isExecuting || Kernel.readyQueue.size() > 0)
+    {
+    	Kernel.scheduleCycle(step);
+    }
+    /*
     // If there are no interrupts then run a CPU cycle if there is anything being processed.
     else if (_CPU.isExecuting) 
     {
@@ -108,6 +114,7 @@ Kernel.onCpuClockPulse = function(button)
     {
     	Kernel.dispatchNextProcess();
     }
+    */
     else // If there are no interrupts and there is nothing being executed then just be idle.
     {
         Kernel.trace("Idle");
@@ -165,38 +172,6 @@ Kernel.loadMemory = function(code)
 	}
 };
 
-// Runs the specified process (i.e. moves it from the resident list to the ready queue).
-Kernel.runProcess = function(pid)
-{
-	// Get the PCB.
-	var pcb = Kernel.residentList[pid];
-	
-	// Check if the PCB defines a valid process.
-	if (pcb != null)
-	{
-		Kernel.trace("Running process: " + pid);
-		// Place on the ready queue.
-		Kernel.readyQueue.enqueue(pcb);
-		pcb.status = "Ready";
-		// Remove from resident list.
-		Kernel.residentList[pid] = undefined;
-	}
-	else // Process does not exist.
-		_StdIn.putText("There is no process with that ID.");
-};
-
-// Dispatches the specified process to the CPU to be executed.
-Kernel.dispatchNextProcess = function()
-{
-	var pcb = Kernel.readyQueue.dequeue();
-	
-	Kernel.runningProcess = pcb;
-	
-	Kernel.memoryManager.setRelocationRegister(pcb);
-	_CPU.setRegisters(pcb);
-	_CPU.isExecuting = true;
-};
-
 // ---------- Interrupt servicing ----------
 
 Kernel.enableInterrupts = function()
@@ -216,6 +191,8 @@ Kernel.disableInterrupts = function()
 // This is the Interrupt Handler Routine.  Page 8.
 Kernel.interruptHandler = function(irq, params)
 {
+	_MODE = KERNEL_MODE;
+	
     // Trace our entrance here so we can compute Interrupt Latency by analyzing the log file later on.  Page 766.
     Kernel.trace("Handling IRQ~" + irq);
 
@@ -239,6 +216,10 @@ Kernel.interruptHandler = function(irq, params)
         	break;
         case PROCESS_TERMINATED_IRQ:
         	Kernel.processTerminatedIsr();
+        	break;
+        case CONTEXT_SWITCH_IRQ:
+        	Kernel.contextSwitchIsr();
+        	break;
         case SYSTEM_CALL_IRQ:
         	Kernel.systemCallIsr(params);
         	break;
@@ -255,36 +236,6 @@ Kernel.timerIsr = function()
     // Check multiprogramming parameters and enforce quanta here. Call the scheduler / context switch here if necessary.
 };
 
-// ISR for when a process performs an invalid action.
-Kernel.processFaultIsr = function(message)
-{	
-	var fullMessage = "Process aborted (PID " + Kernel.runningProcess.pid + ")" + (message != null ? ": " + message : ".");
-	Kernel.trace(fullMessage);
-	_StdIn.putText(fullMessage);
-	
-	// Stop CPU execution
-	_CPU.isExecuting = false;
-	_CPU.clearRegisters();
-	
-	// Move process back to resident list (since it's still in memory)
-	Kernel.residentList[Kernel.runningProcess.pid] = Kernel.runningProcess;
-	Kernel.runningProcess = null;
-};
-
-// ISR for when a process terminates.
-Kernel.processTerminatedIsr = function()
-{
-	Kernel.trace("Process completed (PID " + Kernel.runningProcess.pid + ").");
-	
-	// Stop CPU execution
-	_CPU.isExecuting = false;
-	_CPU.clearRegisters();
-	
-	// Remove process
-	Kernel.memoryManager.deallocate(Kernel.runningProcess);
-	Kernel.runningProcess = null;
-};
-
 Kernel.systemCallIsr = function(param)
 {
 	if (param == 1)
@@ -296,9 +247,8 @@ Kernel.systemCallIsr = function(param)
 		
 		while (data !== 0)
 		{
-			data = Kernel.memoryManager.read(address);
+			data = Kernel.memoryManager.read(address++);
 			_StdIn.putText(String.fromCharCode(data));
-			address++;
 		}
 	}
 };
@@ -313,7 +263,7 @@ Kernel.trace = function(message)
         if (message === "Idle")
         {
             // Don't log every idle clock pulse.
-            if (_OSclock % 10 == 0)  // Dependent on CPU_CLOCK_INTERVAL
+            if (_OSclock % 10 === 0)  // Dependent on CPU_CLOCK_INTERVAL
                 Control.log(message, "OS");
         }
         else

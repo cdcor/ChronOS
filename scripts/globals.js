@@ -30,19 +30,28 @@ var TIMER_IRQ    = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt p
 var KEYBOARD_IRQ = 1;
 var PROCESS_FAULT_IRQ = 2;
 var PROCESS_TERMINATED_IRQ = 3;
-var SYSTEM_CALL_IRQ = 4;
+var CONTEXT_SWITCH_IRQ = 4;
+var SYSTEM_CALL_IRQ = 5;
 
 // Console
 var DEFAULT_FONT = "sans";
 var DEFAULT_FONT_SIZE = 13;     
 var FONT_HEIGHT_MARGIN = 4; // Additional space added to font size when advancing a line.
 
+// OS
+var KERNEL_MODE = 0;
+var USER_MODE = 1;
+
+var DEFAULT_SCHEDULING_QUATUM = 6;
+
+
 // ---------- Global Variables ----------
+
 var _CPU = null;
 
 var _OSclock = 0; // Page 23.
 
-var _Mode = 0; // 0 = Kernel Mode, 1 = User Mode.  See page 21.
+var _Mode = KERNEL_MODE; // Page 21.
 
 // Default the OS trace to be on.
 var _Trace = true;

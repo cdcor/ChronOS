@@ -15,8 +15,12 @@ function MemoryManager()
     this.relocationRegister = 0;
 }
 
-// Sets the base and limit registers for the given process based on availability. Also sets the 
-// block as allocated according to the PID. Returns true if the procces was successfully allocated.
+/**
+ * Sets the base and limit registers for the given process based on availability. Also sets the 
+ * block as allocated according to the PID. Returns true if the procces was successfully allocated.
+ * 
+ * @param {Pcb} pcb the process to allocate
+ */
 MemoryManager.prototype.allocate = function(pcb)
 {
 	Kernel.trace("Allocating memory.");
@@ -50,7 +54,11 @@ MemoryManager.prototype.allocate = function(pcb)
     }
 };
 
-// Deallocates the memory block associated with the given process.
+/**
+ * Deallocates the memory block associated with the given process.
+ *  
+ * @param {Pcb} pcb the process to deallocate
+ */
 MemoryManager.prototype.deallocate = function(pcb)
 {
 	Kernel.trace("Deallocating memory.");
@@ -82,14 +90,22 @@ MemoryManager.prototype.deallocate = function(pcb)
         Kernel.trace("Memory deallocation failed: Process not found.");
 };
 
-// Sets the relocation register according to the given process.
+/**
+ * Sets the relocation register according to the given process.
+ *  
+ * @param {Pcb} pcb the process to set the relocation register for
+ */
 MemoryManager.prototype.setRelocationRegister = function(pcb)
 {
 	Kernel.trace("Setting relocation register to " + pcb.base + " (PID " + pcb.pid + ").");
     this.relocationRegister = pcb.base;
 };
 
-// Reads the data located in the given logical address from memory.
+/**
+ * Reads the data located in the given logical address from memory.
+ * 
+ * @param {Number} address the logical address to read
+ */
 MemoryManager.prototype.read = function(address)
 {
     // Ensure valid address. Trap error if not.
@@ -99,7 +115,12 @@ MemoryManager.prototype.read = function(address)
         return this.memory.read(address + this.relocationRegister);
 };
 
-// Writes the given data to memory at the specified logical address.
+/**
+ * Writes the given data to memory at the specified logical address.
+ *  
+ * @param {Number} address the logical address to write the data to
+ * @param {Number} data the data to write
+ */
 MemoryManager.prototype.write = function(address, data)
 {
 	// Convert to number
@@ -120,12 +141,19 @@ MemoryManager.prototype.write = function(address, data)
         this.memory.write(address + this.relocationRegister, data);
 };
 
-// Returns the contents of memory as an array. For display purposes only.
+/**
+ * Returns the contents of memory as an array. For display purposes only. 
+ * 
+ * @return {Array} the contents of memory
+ */
 MemoryManager.prototype.getDisplayContents = function() 
 {
 	return this.memory.getDisplayContents();
 };
 
+/**
+ * Resets the read/write status of each word in memory. For display purposes only. 
+ */
 MemoryManager.prototype.resetDisplayContents = function()
 {
 	this.memory.resetDisplayContents();

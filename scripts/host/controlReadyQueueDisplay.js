@@ -24,7 +24,7 @@ ReadyQueueDisplay.update = function()
 	var displayData = "", processes = Kernel.readyQueue.getContents();
 	
 	for (var i = 0; i < processes.length; i++)
-		displayData += "<br>" + processes[i].toString(true);
+		displayData += "<br>" + i + " | " + processes[i].toString(true);
 	
 	// Remove first line break.
 	displayData = displayData.replace("<br>", "");
