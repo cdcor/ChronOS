@@ -29,6 +29,7 @@
     <script type="text/javascript" src="scripts/host/memory.js"></script>
     
     <script type="text/javascript" src="scripts/host/control.js"></script>
+    <script type="text/javascript" src="scripts/host/controlMode.js"></script>
     <script type="text/javascript" src="scripts/host/controlLog.js"></script>
     <script type="text/javascript" src="scripts/host/controlCpuDisplay.js"></script>
     <script type="text/javascript" src="scripts/host/controlMemoryDisplay.js"></script>
@@ -53,10 +54,14 @@
 
 <body>
     <!-- Background -->
-    <div id="backgroundAnimation" class="background"></div>
-    <div id="backgroundCircuit" class="background"></div>
+    <!-- <div id="backgroundAnimation" class="background"></div> -->
+    <!-- <div id="backgroundCircuit" class="background"></div> -->
     
     <div id="mainContainer">
+    	
+    	<div id="mBanner" class="banner"></div>
+    	<div id="kBanner" class="banner"></div>
+    	
         <!-- Header/Banner -->
         <table id="tableBanner">
         <tr>
@@ -85,9 +90,6 @@
                        onclick="Control.hostReset(this)"
                 />            
                 </td>
-                <td id="banner">
-                    <img src="images/banner.png" alt="banner" />
-                </td>
                 <td id="statusBar">
                     <table>
                         <tr><td id="statusText"></td></tr>
@@ -106,6 +108,7 @@
         	<div class="container">
         		<div>Shell</div>
         		<div id="shellContainer">
+        			<div id="kShellBackground"></div>
         			<canvas id="display"
 	                        width="500px"
 	                        height="580px"

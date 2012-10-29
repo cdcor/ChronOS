@@ -38,7 +38,8 @@ Control.init = function()
     ReadyQueueDisplay.init();
     
     ProgramInput.init();
-    DisplaySecret.init();
+    
+    ControlMode.init();
 };
 
 /**

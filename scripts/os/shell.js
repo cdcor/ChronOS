@@ -100,18 +100,18 @@ Shell.prototype.init = function()
     sc.funct = shellWhereAmI;
     this.commandList[this.commandList.length] = sc;
     
-    // rain
-    sc = new ShellCommand();
-    sc.command = "rain";
-    sc.description = "- ???";
-    sc.funct = shellRain;
-    this.commandList[this.commandList.length] = sc;
-    
     // fail
     sc = new ShellCommand();
     sc.command = "fail";
     sc.description = "- Produce an OS error to be trapped.";
     sc.funct = shellTrap;
+    this.commandList[this.commandList.length] = sc;
+    
+    // klingon mode
+    sc = new ShellCommand();
+    sc.command = "quv"
+    sc.description = "'ej batlh - ???";
+    sc.funct = ControlMode.toggleKlingonMode;
     this.commandList[this.commandList.length] = sc;
     
     // load
@@ -124,7 +124,7 @@ Shell.prototype.init = function()
     // run
     sc = new ShellCommand();
     sc.command = "run";
-    sc.description = "<PID> (s) - Runs the specified process (single step).";
+    sc.description = "<PID> - Runs the specified process.";
     sc.funct = shellRunProcess;
     this.commandList[this.commandList.length] = sc;
 
@@ -450,13 +450,6 @@ function shellWhereAmI()
     _StdIn.putText("unknown");
 }
 
-function shellRain()
-{
-	_StdIn.putText("Temporarily disabled...");
-    //_StdIn.putText("  ><> ><> ><> ><> ><> ><>");
-    //DisplaySecret.animate();
-}
-
 function shellTrap()
 {
     // Create trap error.
@@ -479,7 +472,7 @@ function shellLoad()
 	}
 }
 
-function shellRunProcess(args)
+function shellRunProcess()
 {
 	if (args.length > 0)
 	{
