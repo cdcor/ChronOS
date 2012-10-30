@@ -472,7 +472,7 @@ function shellLoad()
 	}
 }
 
-function shellRunProcess()
+function shellRunProcess(args)
 {
 	if (args.length > 0)
 	{
