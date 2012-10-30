@@ -44,9 +44,15 @@ Control.init = function()
 
 /**
  * Returns the OS's canvas element (to imitate the shell). 
+ * 
+ * @param {Boolean} forJQuery true if the canvas should be returned as a JQuery object
+ * 
+ * @return {Object} the canvas
  */
-Control.getCanvas = function()
+Control.getCanvas = function(forJQuery)
 {
+	if (forJQuery)
+		return $('#display');
     return $('#display')[0];
 };
 

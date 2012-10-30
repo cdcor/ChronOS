@@ -10,7 +10,7 @@
 function Console(canvas)
 {
     this.canvas = canvas;
-    this.context = canvas.getContext('2d');
+    this.context = canvas.getContext("2d");
     
     this.currentFont = DEFAULT_FONT;
     this.currentFontSize = DEFAULT_FONT_SIZE;
@@ -20,6 +20,10 @@ function Console(canvas)
                                     // TODO: convert to a stack to handle an arbitrary number of lines to retreat
     this.currentYPosition = DEFAULT_FONT_SIZE;
     this.buffer = "";
+    
+    this.hasFocus = false;
+    this.cursor = false;
+    this.cursorAnim = null;
     
     this.init();
 }
@@ -82,8 +86,11 @@ Console.prototype.handleInput = function()
     }
 };
 
-Console.prototype.putText = function(text)
-{
+Console.prototype.putText = function(text, forCursor)
+{	
+	if (!forCursor)
+		this.toggleCursor(false);
+	
     // For wrapping to next line. TODO: Word wrapping if time
     for (var i = 0; i < text.length; i++)
     {
@@ -104,6 +111,9 @@ Console.prototype.putText = function(text)
         // Move the current X position.
         this.currentXPosition += offset;
     }
+    
+    if (!forCursor && Control.getCanvas(true).is(":focus"))
+    	this.toggleCursor(true);
 };
 
 Console.prototype.deleteChar = function(chr)
@@ -121,12 +131,16 @@ Console.prototype.deleteChar = function(chr)
 
 Console.prototype.advanceLine = function()
 {
+	this.toggleCursor(false);
+	
     this.currentXPosition = 0;
     this.currentYPosition += DEFAULT_FONT_SIZE + FONT_HEIGHT_MARGIN;
     
     // If the Y position goes off the canvas...
     if (this.currentYPosition >= this.canvas.height)
         this.scroll(2);
+        
+    this.toggleCursor(true);
 };
 
 Console.prototype.retreatLine = function()
@@ -161,5 +175,50 @@ Console.prototype.bsod = function()
     
     // Drawing BSoD on canvas does not work everytime. Workaround:
     var bsod = '<img src="images/bsod.png" alt="bsod.png" style="border: 2px solid #666;"/>';
-    $('#tdDisplay').html(bsod);
+    $('#shellContainer').html(bsod);
 };
+
+Console.prototype.toggleCursor = function(cursor)
+{
+	if (cursor)
+	{
+		var self = this;
+		
+		var hide = function()
+		{
+			self.hideCursor();
+		};
+		
+		var show = function()
+		{
+			self.showCursor();
+			setTimeout(hide, 500);
+		};
+		
+		show();
+		this.cursorAnim = setInterval(show, 1000);
+	}
+	else
+	{
+		this.hideCursor();
+		clearInterval(this.cursorAnim);
+	}
+};
+
+Console.prototype.showCursor = function()
+{
+	if (!this.cursor)
+	{
+		this.putText("|", true);
+		this.cursor = true;
+	}
+}
+
+Console.prototype.hideCursor = function()
+{
+	if (this.cursor)
+	{
+		this.deleteChar("|");
+		this.cursor = false;
+	}
+}
