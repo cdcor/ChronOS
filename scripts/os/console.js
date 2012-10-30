@@ -103,7 +103,7 @@ Console.prototype.putText = function(text, forCursor)
         {
             // Save last X position in case of backspace
             this.previousLineXPosition = this.currentXPosition;
-            this.advanceLine();
+            this.advanceLine(true);
         }
             
         // Draw the text at the current X and Y coordinates.
@@ -129,9 +129,16 @@ Console.prototype.deleteChar = function(chr)
         this.retreatLine(offset);
 };
 
-Console.prototype.advanceLine = function()
+/**
+ * Advances the console 1 line.
+ * 
+ * @param {Boolean} forWordWrap true if the console is to be advanced in the case of word wrapping
+ *     (prevents the cursor from appearing on a wrapped line)
+ */
+Console.prototype.advanceLine = function(forWordWrap)
 {
-	this.toggleCursor(false);
+	if (!forWordWrap)
+		this.toggleCursor(false);
 	
     this.currentXPosition = 0;
     this.currentYPosition += DEFAULT_FONT_SIZE + FONT_HEIGHT_MARGIN;
@@ -139,8 +146,9 @@ Console.prototype.advanceLine = function()
     // If the Y position goes off the canvas...
     if (this.currentYPosition >= this.canvas.height)
         this.scroll(2);
-        
-    this.toggleCursor(true);
+    
+    if (!forWordWrap)    
+    	this.toggleCursor(true);
 };
 
 Console.prototype.retreatLine = function()

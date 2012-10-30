@@ -124,7 +124,7 @@ Shell.prototype.init = function()
     // run
     sc = new ShellCommand();
     sc.command = "run";
-    sc.description = "<PID> - Runs the specified process.";
+    sc.description = "<PID0> [<PID1> ...] - Runs the specified processes.";
     sc.funct = shellRunProcess;
     this.commandList[this.commandList.length] = sc;
 
@@ -151,6 +151,14 @@ Shell.prototype.handleInput = function(buffer)
     userCommand = this.parseInput(buffer);
     // ... and assign the command and args to local variables.
     var cmd = userCommand.command;
+    
+    if (cmd == "")
+    {
+    	_StdIn.advanceLine();
+    	this.putPrompt();
+    	return;
+    }
+    
     var args = userCommand.args;
     //
     // Determine the command and execute it.
@@ -230,7 +238,7 @@ Shell.prototype.execute = function(fn, args)
     // .. call the command function passing in the args...
     fn(args);
     // Check to see if we need to advance the line again
-    if (_StdIn.currentXPosition > 0)
+    if (_StdIn.currentXPosition > 8)
     {
         _StdIn.advanceLine();
     }
@@ -476,12 +484,16 @@ function shellRunProcess(args)
 {
 	if (args.length > 0)
 	{
-		var pid = parseInt(args[0])
-		
-		if (!isNaN(pid))
-			Kernel.runProcess(pid);
-		else
-			_StdIn.putText("That process ID is invalid.");
+		var pid;
+		for (var i in args)
+		{
+			pid = parseInt(args[i])
+			
+			if (!isNaN(pid))
+				Kernel.runProcess(pid);
+			else
+				_StdIn.putText("Process ID: " + args[i] + " is invalid.");
+		}
 	}
 	else
 		_StdIn.putText("Usage: run <PID>  Please supply a process ID.");
