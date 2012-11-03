@@ -86,10 +86,9 @@ Console.prototype.handleInput = function()
     }
 };
 
-Console.prototype.putText = function(text, forCursor)
+Console.prototype.putText = function(text)
 {	
-	if (!forCursor)
-		this.toggleCursor(false);
+	this.toggleCursor(false);
 	
     // For wrapping to next line. TODO: Word wrapping if time
     for (var i = 0; i < text.length; i++)
@@ -112,12 +111,14 @@ Console.prototype.putText = function(text, forCursor)
         this.currentXPosition += offset;
     }
     
-    if (!forCursor && Control.getCanvas(true).is(":focus"))
+    if (Control.isCanvasFocused())
     	this.toggleCursor(true);
 };
 
 Console.prototype.deleteChar = function(chr)
 {
+	this.toggleCursor(false);
+	
     // Move the current X postion to before the character.
     var offset = this.context.measureText(this.currentFont, this.currentFontSize, chr);
     this.currentXPosition -= offset;
@@ -127,18 +128,17 @@ Console.prototype.deleteChar = function(chr)
     
     if (this.CurrentXPosition <= 0)
         this.retreatLine(offset);
+    
+    if (Control.isCanvasFocused())
+    	this.toggleCursor(true);
 };
 
 /**
  * Advances the console 1 line.
- * 
- * @param {Boolean} forWordWrap true if the console is to be advanced in the case of word wrapping
- *     (prevents the cursor from appearing on a wrapped line)
  */
-Console.prototype.advanceLine = function(forWordWrap)
+Console.prototype.advanceLine = function()
 {
-	if (!forWordWrap)
-		this.toggleCursor(false);
+	this.toggleCursor(false);
 	
     this.currentXPosition = 0;
     this.currentYPosition += DEFAULT_FONT_SIZE + FONT_HEIGHT_MARGIN;
@@ -147,14 +147,19 @@ Console.prototype.advanceLine = function(forWordWrap)
     if (this.currentYPosition >= this.canvas.height)
         this.scroll(2);
     
-    if (!forWordWrap)    
+    if (Control.isCanvasFocused())
     	this.toggleCursor(true);
 };
 
 Console.prototype.retreatLine = function()
 {
+	this.toggleCursor(false);
+	
     this.currentXPosition = this.previousLineXPosition;
     this.currentYPosition -= DEFAULT_FONT_SIZE + FONT_HEIGHT_MARGIN;
+    
+    if (Control.isCanvasFocused())
+    	this.toggleCursor(true);
 };
 
 Console.prototype.scroll = function(lines)
@@ -217,7 +222,7 @@ Console.prototype.showCursor = function()
 {
 	if (!this.cursor)
 	{
-		this.putText("|", true);
+		this.context.fillRect(this.currentXPosition, this.currentYPosition - this.currentFontSize, 1, this.currentFontSize + 4);
 		this.cursor = true;
 	}
 }
@@ -226,7 +231,7 @@ Console.prototype.hideCursor = function()
 {
 	if (this.cursor)
 	{
-		this.deleteChar("|");
+		this.context.clearRect(this.currentXPosition - 1, this.currentYPosition - this.currentFontSize, 3, this.currentFontSize + 4);
 		this.cursor = false;
 	}
 }

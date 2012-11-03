@@ -119,7 +119,14 @@ Kernel.processFaultIsr = function(message)
 			(message ? ": " + message : ".");
 			
 	Kernel.trace(fullMessage);
-	_StdIn.putText(fullMessage);
+	
+	if (_KlingonMode)
+	{
+		_StdIn.advanceLine();
+		_StdIn.putText("If it's in your way, knock it down. (PID: " + Kernel.runningProcess.pid + ")");
+	}
+	else
+		_StdIn.putText(fullMessage);
 	
 	// Stop CPU execution
 	_CPU.isExecuting = false;
@@ -145,4 +152,7 @@ Kernel.processTerminatedIsr = function()
 	Kernel.memoryManager.deallocate(Kernel.runningProcess);
 	Kernel.runningProcess.status = "Terminated";
 	Kernel.runningProcess = null;
+	
+	if (_KlingonMode)
+		_StdIn.putText(" Qapla'! ");
 };

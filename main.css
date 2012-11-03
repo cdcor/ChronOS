@@ -228,25 +228,32 @@ img
 #cpuDisplay
 {
 	margin: 0 0 5px 0;
-	width: 112px;
+	width: 108px;
 	height: 135px;
 	border: 2px solid #666;
 	border-collapse: collapse;
 }
 
-#cpuDisplay tr td
+#cpuDisplayTable
+{
+	width: 100%;
+	height: 100%;
+	border-collapse: collapse;
+}
+
+#cpuDisplayTable tr td
 {
 	padding-right: 5px;
 	border-bottom: 1px solid #666;
 	text-align: right;
 }
 
-#cpuDisplay tr td:last-of-type /* The last column. */
+#cpuDisplayTable tr td:last-of-type /* The last column. */
 {
 	width: 40px;
 }
 
-#cpuDisplay tr:last-of-type td /* The last row. */
+#cpuDisplayTable tr:last-of-type td /* The last row. */
 {
 	border: none;
 }
@@ -285,7 +292,7 @@ img
 #memoryContainer
 {
 	position: absolute;
-	top: 232px;
+	top: 233px;
 	left: 125px;
 }
 
@@ -298,6 +305,23 @@ img
 	overflow-x: hidden;
 	overflow-y: scroll;
     white-space: nowrap;
+}
+
+#memoryDisplayTable /* The table created by the display script. */
+{
+	border-spacing: 0;
+	font-family: monospace;
+}
+
+#memoryDisplayTable tr td
+{
+	width: 25px;
+	height: 18px;
+}
+
+#memoryDisplayTable tr td:first-child /* The address label */
+{
+	width: 55px;
 }
 
 /* Ready Queue */

@@ -10,6 +10,7 @@ function MemoryDisplay() {}
 
 MemoryDisplay.display = null;
 
+MemoryDisplay.lineHeight = 18;
 MemoryDisplay.autoscroll = false;
 
 /**
@@ -31,35 +32,41 @@ MemoryDisplay.update = function()
 	
 	var memory = Kernel.memoryManager.getDisplayContents();
 	var earliestChangedAddress = MEMORY_SIZE;
+	var subIndex;
 	
-	var displayData = "<pre>";
+	var displayData = '<table id="memoryDisplayTable">';
 	
 	for (var i = 0; i < memory.length; i++)
 	{
-		if (i % MEMORY_DISPLAY_ADDRESSES_PER_LINE == 0) // Move to next line
-			displayData += "<br>" + MemoryDisplay.formatAddress(i);
+		subIndex = i % MEMORY_DISPLAY_ADDRESSES_PER_LINE;
+		
+		if (subIndex === 0) // Move to next line
+			displayData += "<tr><td>" + MemoryDisplay.formatAddress(i) + "</td>";
 			
 		// Color the data according to the current status of the word.
 		if (memory[i].status === MemoryWord.STATUS_NORMAL)
-			displayData += " " + MemoryDisplay.formatData(memory[i].data);
+			displayData += "<td>" + MemoryDisplay.formatData(memory[i].data) + "</td>";
 		else if (memory[i].status === MemoryWord.STATUS_READ)
 		{
-			displayData += ' <span style="color: green;"><strong>' + MemoryDisplay.formatData(memory[i].data) + "</strong></span>";
+			displayData += '<td><span style="color: green;"><strong>' + MemoryDisplay.formatData(memory[i].data) + "</strong></span></td>";
 			
 			if (earliestChangedAddress > i)
 				earliestChangedAddress = i;
 		}
 		else if (memory[i].status === MemoryWord.STATUS_WRITTEN)
 		{
-			displayData += ' <span style="color: blue;"><strong>' + MemoryDisplay.formatData(memory[i].data) + "</strong></span>";
+			displayData += '<td><span style="color: blue;"><strong>' + MemoryDisplay.formatData(memory[i].data) + "</strong></span></td>";
 			
 			if (earliestChangedAddress > i)
 				earliestChangedAddress = i;
 		}
+		
+		if (subIndex === MEMORY_DISPLAY_ADDRESSES_PER_LINE - 1)
+			displayData += "</tr>";
 	}
 	
 	// Remove first line break and terminate pre tag.
-	displayData = displayData.replace("<br>", "") + "</pre>";
+	displayData = displayData.replace("<br>", "") + "</table>";
 	
 	// Update div with new contents
 	MemoryDisplay.display.html(displayData);
@@ -115,12 +122,12 @@ MemoryDisplay.formatData = function(data)
 MemoryDisplay.scrollTo = function(address, speed)
 {
 	if (!speed)
-		MemoryDisplay.display[0].scrollTop = 18 * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE);
+		MemoryDisplay.display[0].scrollTop = MemoryDisplay.lineHeight * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE);
 	else
 	{
 		MemoryDisplay.display.animate({
-			scrollTop: 18 * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE)
-		}, speed, "easeOutQuad");
+			scrollTop : MemoryDisplay.lineHeight * Math.floor(address / MEMORY_DISPLAY_ADDRESSES_PER_LINE)
+		}, speed, "swing");
 	}
 };
 

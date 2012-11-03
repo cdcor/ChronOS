@@ -28,105 +28,112 @@ Shell.prototype.init = function()
     sc.command = "ver";
     sc.description = "- Displays the current version data."
     sc.funct = shellVer;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
     
     // help
     sc = new ShellCommand();
     sc.command = "help";
     sc.description = "- This is the help command. Seek help."
     sc.funct = shellHelp;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
     
     // shutdown
     sc = new ShellCommand();
     sc.command = "shutdown";
     sc.description = "- Shuts down the virtual OS but leaves the underlying hardware simulation running."
     sc.funct = shellShutdown;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
 
     // cls
     sc = new ShellCommand();
     sc.command = "cls";
     sc.description = "- Clears the screen and resets the cursor position."
     sc.funct = shellCls;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
 
     // man <topic>
     sc = new ShellCommand();
     sc.command = "man";
     sc.description = "<topic> - Displays the MANual page for <topic>.";
     sc.funct = shellMan;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
     
     // trace <on | off>
     sc = new ShellCommand();
     sc.command = "trace";
     sc.description = "<on | off> - Turns the OS trace on or off.";
     sc.funct = shellTrace;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
 
     // rot13 <string>
     sc = new ShellCommand();
     sc.command = "rot13";
     sc.description = "<string> - Does rot13 obfuscation on <string>.";
     sc.funct = shellRot13;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
 
     // prompt <string>
     sc = new ShellCommand();
     sc.command = "prompt";
     sc.description = "<string> - Sets the prompt.";
     sc.funct = shellPrompt;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
 
     // date
     sc = new ShellCommand();
     sc.command = "date";
     sc.description = "- Displays the current time.";
     sc.funct = shellDate;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
 
     // status
     sc = new ShellCommand();
     sc.command = "status";
     sc.description = "<string> - Sets the current status.";
     sc.funct = shellStatus;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
 
     // whereami
     sc = new ShellCommand();
     sc.command = "whereami";
     sc.description = "- Displays your location.";
     sc.funct = shellWhereAmI;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
     
     // fail
     sc = new ShellCommand();
     sc.command = "fail";
     sc.description = "- Produce an OS error to be trapped.";
     sc.funct = shellTrap;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
     
     // klingon mode
     sc = new ShellCommand();
     sc.command = "quv"
     sc.description = "'ej batlh - ???";
     sc.funct = ControlMode.toggleKlingonMode;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
     
     // load
     sc = new ShellCommand();
     sc.command = "load";
     sc.description = "- Loads the machine code into memory.";
     sc.funct = shellLoad;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
     
     // run
     sc = new ShellCommand();
     sc.command = "run";
-    sc.description = "<PID0> [<PID1> ...] - Runs the specified processes.";
+    sc.description = "<PID0> [<PID1> ...] - Runs the given processes.";
     sc.funct = shellRunProcess;
-    this.commandList[this.commandList.length] = sc;
+    this.commandList.push(sc);
+
+	// round-robin quantum
+	sc = new ShellCommand();
+	sc.command = "quantum"
+	sc.description = "<value> - Sets the round robin quantum.";
+	sc.funct = shellSetRoundRobinQuantum;
+	this.commandList.push(sc);
 
     // processes - list the running processes and their IDs
     // kill <id> - kills the specified process id.
@@ -497,4 +504,19 @@ function shellRunProcess(args)
 	}
 	else
 		_StdIn.putText("Usage: run <PID>  Please supply a process ID.");
+}
+
+function shellSetRoundRobinQuantum(args)
+{
+	if (args.length > 0)
+	{
+		var quantum = parseInt(args[0]);
+		
+		if (!isNaN(quantum) || quantum < 1)
+			Kernel.schedulingQuantum = quantum;
+		else
+			_StdIn.putText("The quantum must a nonzero integer.");
+	}
+	else
+		_StdIn.putText("Usage: quantum <value>  Please supply a value.");
 }

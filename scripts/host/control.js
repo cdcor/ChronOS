@@ -19,6 +19,9 @@
 $(document).ready(function() 
 {
     Control.init();
+    
+    // Temp - autostart for debugging
+    Control.hostStart($("#btnStartOS")[0]);
 });
 
 function Control() {}
@@ -43,18 +46,24 @@ Control.init = function()
 };
 
 /**
- * Returns the OS's canvas element (to imitate the shell). 
- * 
- * @param {Boolean} forJQuery true if the canvas should be returned as a JQuery object
+ * Returns the OS's canvas element (to imitate the shell).
  * 
  * @return {Object} the canvas
  */
-Control.getCanvas = function(forJQuery)
+Control.getCanvas = function()
 {
-	if (forJQuery)
-		return $('#display');
     return $('#display')[0];
 };
+
+/**
+ * Returns true if the canvas is focused.
+ * 
+ * @return {Boolean} true if the canvas is focused, false otherwise 
+ */
+Control.isCanvasFocused = function()
+{
+	return $("#display").is(":focus");
+}
 
 /**
  * Logs a message to the host's log. 
