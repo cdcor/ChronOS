@@ -37,6 +37,7 @@ function Cpu()
 Cpu.prototype.setRegisters = function(pcb)
 {
 	this.pc.write(pcb.pc);
+	this.acc.write(pcb.acc);
 	this.xReg.write(pcb.xReg);
 	this.yReg.write(pcb.yReg);
 	this.zFlag.write(pcb.zFlag);
@@ -101,7 +102,16 @@ Cpu.prototype.execute = function()
 	if (this.op == null)
 		this.fault("Invalid operation.");
 	else
-		this.op();
+	{
+		try
+		{
+			this.op();
+		}
+		catch (e)
+		{
+			this.fault(e);
+		}
+	}
 };
 
 // ---------- Interrupt ----------

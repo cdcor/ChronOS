@@ -53,6 +53,18 @@ Queue.prototype.dequeue = function()
 }
 
 /**
+ * Removes the element from the specified index in the queue.
+ * 
+ * @param {Number} index the index
+ */
+Queue.prototype.remove = function(index)
+{
+	var firstPart = this.queue.splice(0, index);
+	this.queue.shift();
+	this.queue = firstPart.concat(this.queue);
+}
+
+/**
  * Return the contents of this queue as an array.
  * 
  * @return {Array} the contents of this queue

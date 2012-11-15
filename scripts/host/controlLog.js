@@ -51,6 +51,11 @@ Log.add = function(message, source, clock)
    Log.lastMessage = message;
 };
 
+Log.clear = function() 
+{
+	$('#log').html("");
+};
+
 // Gets a date stamp appropriate for a log.
 Log.getCurrentDateStamp = function()
 {
@@ -86,7 +91,7 @@ Log.applyMessageStyle = function(message)
 {
     if (message.search(/idle/i) != -1) // Idle shows up more often, so it's more efficient to find it first
         message = message;
-    else if (message.search(/(shutdown|failed|fault|abort)/i) != -1)
+    else if (message.search(/(shutdown|failed|fault|abort|terminate|kill)/i) != -1)
         message = Log.applyStyle(message, '#FF7700');
     else if (message.search(/(emergency|halt|error)/i) != -1)
         message = Log.applyStyle(message, 'red');

@@ -26,28 +26,28 @@ Shell.prototype.init = function()
     // ver
     sc = new ShellCommand();
     sc.command = "ver";
-    sc.description = "- Displays the current version data."
+    sc.description = "- Displays the current version data.";
     sc.funct = shellVer;
     this.commandList.push(sc);
     
     // help
     sc = new ShellCommand();
     sc.command = "help";
-    sc.description = "- This is the help command. Seek help."
+    sc.description = "- This is the help command. Seek help.";
     sc.funct = shellHelp;
     this.commandList.push(sc);
     
     // shutdown
     sc = new ShellCommand();
     sc.command = "shutdown";
-    sc.description = "- Shuts down the virtual OS but leaves the underlying hardware simulation running."
+    sc.description = "- Shuts down the virtual OS but leaves the underlying hardware simulation running.";
     sc.funct = shellShutdown;
     this.commandList.push(sc);
 
     // cls
     sc = new ShellCommand();
     sc.command = "cls";
-    sc.description = "- Clears the screen and resets the cursor position."
+    sc.description = "- Clears the screen and resets the cursor position.";
     sc.funct = shellCls;
     this.commandList.push(sc);
 
@@ -124,8 +124,22 @@ Shell.prototype.init = function()
     // run
     sc = new ShellCommand();
     sc.command = "run";
-    sc.description = "<PID0> [<PID1> ...] - Runs the given processes.";
+    sc.description = "<PID0> [<PID1> ...] - Runs the process(es).";
     sc.funct = shellRunProcess;
+    this.commandList.push(sc);
+    
+    // runall
+    sc = new ShellCommand();
+    sc.command = "runall";
+    sc.description = "- Runs all resident processes.";
+    sc.funct = shellRunAll;
+    this.commandList.push(sc);
+    
+    // active
+    sc = new ShellCommand();
+    sc.command = "active";
+    sc.description = "- Lists active processes.";
+    sc.funct = shellActiveProcesses;
     this.commandList.push(sc);
 
 	// round-robin quantum
@@ -133,6 +147,13 @@ Shell.prototype.init = function()
 	sc.command = "quantum"
 	sc.description = "<value> - Sets the round robin quantum.";
 	sc.funct = shellSetRoundRobinQuantum;
+	this.commandList.push(sc);
+	
+	// kill
+	sc = new ShellCommand();
+	sc.command = "kill"
+	sc.description = "<PID0> [<PID1> ...] - Terminates the process(es).";
+	sc.funct = shellKillProcess;
 	this.commandList.push(sc);
 
     // processes - list the running processes and their IDs
@@ -506,6 +527,24 @@ function shellRunProcess(args)
 		_StdIn.putText("Usage: run <PID>  Please supply a process ID.");
 }
 
+function shellRunAll()
+{
+	Kernel.runAllProcesses();
+}
+
+function shellActiveProcesses()
+{
+	var processes = Kernel.getActiveProcesses(), displayList = "";
+	
+	for (var i = 0; i < processes.length; i++)
+	{
+		if (processes[i])
+			displayList += processes[i].pid + ", ";
+	}
+		
+	_StdIn.putText(displayList.substring(0, displayList.length - 2));
+}
+
 function shellSetRoundRobinQuantum(args)
 {
 	if (args.length > 0)
@@ -519,4 +558,23 @@ function shellSetRoundRobinQuantum(args)
 	}
 	else
 		_StdIn.putText("Usage: quantum <value>  Please supply a value.");
+}
+
+function shellKillProcess(args)
+{
+	if (args.length > 0)
+	{
+		var pid;
+		for (var i in args)
+		{
+			pid = parseInt(args[i])
+			
+			if (!isNaN(pid))
+				Kernel.killProcess(pid);
+			else
+				_StdIn.putText("Process ID: " + args[i] + " is invalid.");
+		}
+	}
+	else
+		_StdIn.putText("Usage: kill <PID>  Please supply a process ID.");
 }

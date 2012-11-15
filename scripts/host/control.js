@@ -21,7 +21,7 @@ $(document).ready(function()
     Control.init();
     
     // Temp - autostart for debugging
-    Control.hostStart($("#btnStartOS")[0]);
+    //Control.hostStart($("#btnStartOS")[0]);
 });
 
 function Control() {}
@@ -75,7 +75,7 @@ Control.log = function(message, source)
 {
     // Check the source.
     if (!source)
-        source = '?';
+        source = "?";
 
     // Note the OS CLOCK.
     var clock = _OSclock;
@@ -104,8 +104,8 @@ Control.hostStart = function(button)
     else // This function is calling the second part of this function after the animation.
     {
         // Enable the Halt and Reset buttons ...
-        document.getElementById("btnHaltOS").disabled = false;
-        document.getElementById("btnReset").disabled = false;
+        $("#btnHaltOS")[0].disabled = false;
+        $("#btnReset")[0].disabled = false;
         
         // Create and initialize the CPU
         _CPU = new Cpu();
@@ -162,6 +162,27 @@ Control.hostReset = function(button)
     {
         // The easiest and most thorough way to do this is to reload (not refresh) the document.
         location.reload(true);
+        
+        // The other way 
+        /*
+        clearInterval(Control.hardwareClockId);
+        
+        _OSclock = 0;
+        
+        _Console.toggleCursor(false);
+        
+        Pcb.lastPid = 0;
+        
+        Log.clear();
+        MemoryDisplay.clear();
+        ReadyQueueDisplay.clear();
+        
+        $("#btnStartOS")[0].disabled = false;
+        $("#btnHaltOS")[0].disabled = true;
+        $("#btnReset")[0].disabled = true;
+        
+        Control.init();
+        */
     }
 };
 

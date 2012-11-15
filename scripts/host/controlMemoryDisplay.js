@@ -65,8 +65,7 @@ MemoryDisplay.update = function()
 			displayData += "</tr>";
 	}
 	
-	// Remove first line break and terminate pre tag.
-	displayData = displayData.replace("<br>", "") + "</table>";
+	displayData += "</table>";
 	
 	// Update div with new contents
 	MemoryDisplay.display.html(displayData);
@@ -78,6 +77,11 @@ MemoryDisplay.update = function()
 		MemoryDisplay.scrollTo(earliestChangedAddress);
 	
 	Kernel.memoryManager.resetDisplayContents();
+};
+
+MemoryDisplay.clear = function()
+{
+	MemoryDisplay.display.html("");
 };
 
 /**

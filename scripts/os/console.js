@@ -225,7 +225,7 @@ Console.prototype.showCursor = function()
 		this.context.fillRect(this.currentXPosition, this.currentYPosition - this.currentFontSize, 1, this.currentFontSize + 4);
 		this.cursor = true;
 	}
-}
+};
 
 Console.prototype.hideCursor = function()
 {
@@ -234,4 +234,4 @@ Console.prototype.hideCursor = function()
 		this.context.clearRect(this.currentXPosition - 1, this.currentYPosition - this.currentFontSize, 3, this.currentFontSize + 4);
 		this.cursor = false;
 	}
-}
+};

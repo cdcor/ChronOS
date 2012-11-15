@@ -229,7 +229,7 @@ img
 {
 	margin: 0 0 5px 0;
 	width: 108px;
-	height: 135px;
+	height: 132px;
 	border: 2px solid #666;
 	border-collapse: collapse;
 }
@@ -334,13 +334,28 @@ img
 
 #readyQueueDisplay
 {
-	padding: 0 2px;
 	width: 247px;
 	height: 96px;
 	border: 2px solid #666;
 	overflow-x: hidden;
 	overflow-y: scroll;
     white-space: nowrap;
+}
+
+#readyQueueDisplayTable
+{
+	border-spacing: 7px 0;
+	font-family: monospace;
+}
+
+#readyQueueDisplayTable tr td
+{
+	text-align: right;
+}
+
+#readyQueueDisplayTable tr:first-of-type td /* "Header" row */
+{
+	border-bottom: 1px solid #666;
 }
 
 /* Program Input */

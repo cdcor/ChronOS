@@ -60,7 +60,7 @@ DeviceDriverKeyboard.prototype.specialSymbolCodes =
 DeviceDriverKeyboard.prototype.driverEntry = function()
 {
     // Initialization routine for this, the kernel-mode Keyboard Device Driver.
-    this.status = "loaded";
+    this.status = "Loaded";
     // More?
 };
 

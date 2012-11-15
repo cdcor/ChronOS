@@ -8,6 +8,7 @@ function Pcb()
 {
     this.pid   = Pcb.lastPid++; // Process ID
     this.pc    = 0;  // Program Counter
+    this.acc   = 0;
     this.xReg  = 0;  // X register
     this.yReg  = 0;  // Y register
     this.zFlag = 0;  // Z-ero flag (Think of it as "isZero")
@@ -29,6 +30,7 @@ Pcb.lastPid = 0;
 Pcb.prototype.setRegisters = function(cpu)
 {
 	this.pc = cpu.pc.data;
+	this.acc = cpu.acc.data;
 	this.xReg = cpu.xReg.data;
 	this.yReg = cpu.yReg.data;
 	this.zFlag = cpu.zFlag.data;
@@ -38,7 +40,7 @@ Pcb.prototype.setRegisters = function(cpu)
  * Returns a string representation of this PCB. 
  * 
  * @param {Boolean} html (optional) true if the string should be formatted for insertion into an 
- *        html document.
+ *     html document.
  * 
  * @return {String} a string representation of this PCB
  */
@@ -46,10 +48,5 @@ Pcb.prototype.toString = function(html)
 {
 	var page = Math.floor(this.base / MEMORY_BLOCK_SIZE);
 	
-	var interChar = html ? ":" : ":";
-	var spaceChar = html ? "&nbsp;&nbsp;" : " ";
 	
-	return "[ PID" + interChar + this.pid + spaceChar + "PC" + interChar + this.pc + spaceChar + 
-			"X" + interChar + this.xReg + spaceChar + "Y" + interChar + this.yReg + spaceChar + 
-			"Z" + interChar + this.zFlag + spaceChar + "Page" + interChar + page + " ]";
 };

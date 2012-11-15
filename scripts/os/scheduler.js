@@ -20,19 +20,74 @@ Kernel.processCycles = 0;
 Kernel.runProcess = function(pid)
 {
 	// Get the PCB.
-	var pcb = Kernel.residentList[pid];
+	var process = Kernel.residentList[pid];
 	
 	// Check if the PCB defines a valid process.
-	if (pcb)
+	if (process)
 	{
 		Kernel.trace("Running process: " + pid);
 		// Place on the ready queue.
-		Kernel.readyQueue.enqueue(pcb);
-		pcb.status = "Ready";
+		Kernel.readyQueue.enqueue(process);
+		process.status = "Ready";
 		// Remove from resident list.
 		Kernel.residentList[pid] = null;
 	}
 	else // Process does not exist.
+		_StdIn.putText("There is no process with that ID.");
+};
+
+/**
+ * Runs all resident processes (i.e. moves them to the ready queue). 
+ */
+Kernel.runAllProcesses = function()
+{
+	var process;
+	
+	for (var i = 0; i < Kernel.residentList.length; i++)
+	{
+		process = Kernel.residentList[i];
+		
+		if (process)
+		{
+			Kernel.trace("Running process: " + process.pid);
+			// Place on the ready queue.
+			Kernel.readyQueue.enqueue(process);
+			process.status = "Ready";
+			// Remove from resident list.
+			Kernel.residentList[i] = null;
+		}
+	}
+};
+
+/**
+ * Terminates the process with the specified ID.
+ * 
+ * @param {Number} pid the ID of the process 
+ */
+Kernel.killProcess = function(pid)
+{
+	var processes = Kernel.getActiveProcesses(), process;
+	
+	// Search for the process from the active processes
+	for (var i = 0; i < processes.length; i++)
+	{
+		if (processes[i].pid === pid)
+		{
+			process = processes[i];
+			break;
+		}
+	}
+	
+	if (process)
+	{
+		Kernel.trace("Killing process: " + process.pid);
+		
+		if (process.status === "Running")
+			Kernel.interruptQueue.enqueue(new Interrupt(PROCESS_TERMINATED_IRQ, "User terminated process."));
+		else // Ready
+			Kernel.readyQueue.remove(i - 1);
+	}
+	else
 		_StdIn.putText("There is no process with that ID.");
 };
 
@@ -86,6 +141,14 @@ Kernel.dispatchNextProcess = function()
  */
 Kernel.contextSwitchIsr = function()
 {
+	// Check if there is a process running as it may have already completed or been aborted if
+	//   either two events coincide with a context switch.
+	if (!Kernel.runningProcess)
+	{
+		Kernel.trace("Context switch aborted: Process already terminated.")
+		return;
+	}
+	
 	var nextProcess = Kernel.readyQueue.dequeue();
 	
 	Kernel.trace("Context switch: Process " + Kernel.runningProcess.pid + " -> " + nextProcess.pid);
@@ -155,4 +218,21 @@ Kernel.processTerminatedIsr = function()
 	
 	if (_KlingonMode)
 		_StdIn.putText(" Qapla'! ");
+};
+
+/**
+ * Returns the active processes: those running and in the ready queue.
+ * 
+ * @return {Array} the active processes
+ */
+Kernel.getActiveProcesses = function()
+{
+	var processes = [Kernel.runningProcess];
+	
+	var readyProcesses = Kernel.readyQueue.getContents();
+	
+	for (var i = 0; i < readyProcesses.length; i++)
+		processes.push(readyProcesses[i]);
+		
+	return processes;
 };
