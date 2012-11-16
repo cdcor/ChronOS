@@ -22,9 +22,13 @@ Kernel.readyQueue = null;
 Kernel.runningProcess = null;
 
 Kernel.keyboardDriver = null;
+Kernel.hddDriver = null;
 
 // ---------- OS Startup and Shutdown Routines ----------
 
+/**
+ * Simulates the bootstrap to start the OS. This is essentially the Kernel's init function. 
+ */
 Kernel.bootstrap = function() // Page 8.
 {
     Control.log("Bootstrap.", "Host");
@@ -65,6 +69,9 @@ Kernel.bootstrap = function() // Page 8.
     _OsShell = new Shell();
 };
 
+/**
+ * Shuts down the Kernel. 
+ */
 Kernel.shutdown = function()
 {
     Kernel.trace("Begin shutdown OS.");
@@ -82,6 +89,11 @@ Kernel.shutdown = function()
     StatusBar.setStatus("Shutdown");
 };
 
+/**
+ * Called by the control to simulate a clock pulse.
+ *  
+ * @param {Object} step exists if this function call resulted from a single step request
+ */
 Kernel.onCpuClockPulse = function(step)
 {
     // This gets called from the host hardware every time there is a hardware clock pulse. 
@@ -100,28 +112,17 @@ Kernel.onCpuClockPulse = function(step)
     {
     	Kernel.scheduleCycle(step);
     }
-    /*
-    // If there are no interrupts then run a CPU cycle if there is anything being processed.
-    else if (_CPU.isExecuting) 
-    {
-    	// If single step is not enabled, cycle the CPU regularly.
-    	//   Else single step is enabled, only cycle when the step button is pressed
-    	//   (it is passed to this function when it is pressed)
-    	if (!Control.singleStep || button != null)
-        	_CPU.cycle();
-    }
-    else if (Kernel.readyQueue.size() > 0)
-    {
-    	Kernel.dispatchNextProcess();
-    }
-    */
     else // If there are no interrupts and there is nothing being executed then just be idle.
     {
         Kernel.trace("Idle");
     }
 };
 
-// Loads the specified code into memory.
+/**
+ * Loads the specified code into memory. 
+ * 
+ * @param {String} code the code to load
+ */
 Kernel.loadMemory = function(code)
 {
     Kernel.trace("Loading program.");
@@ -174,6 +175,9 @@ Kernel.loadMemory = function(code)
 
 // ---------- Interrupt servicing ----------
 
+/**
+ * Enables the interrupts. 
+ */
 Kernel.enableInterrupts = function()
 {
     // Keyboard
@@ -181,6 +185,9 @@ Kernel.enableInterrupts = function()
     // More...?
 };
 
+/**
+ * Disables the interrupts 
+ */
 Kernel.disableInterrupts = function()
 {
     // Keyboard
@@ -188,7 +195,12 @@ Kernel.disableInterrupts = function()
     // More...?
 };
 
-// This is the Interrupt Handler Routine.  Page 8.
+/**
+ * The Interrupt Handler Routine which handles any interrupts placed on the interrupt queue.
+ * 
+ * @param {Number} irq the request specified which ISR to call.
+ * @param {Object} params parameters to be passed to the ISR.
+ */
 Kernel.interruptHandler = function(irq, params)
 {
 	_MODE = KERNEL_MODE;
@@ -255,6 +267,11 @@ Kernel.systemCallIsr = function(param)
 
 // ---------- OS Utility Routines ----------
 
+/**
+ * If trace is on, logs the specified message.
+ *  
+ * @param {String} message the message to log.
+ */
 Kernel.trace = function(message)
 {
     // Check globals to see if trace is set ON.  If so, then (maybe) log the message. 

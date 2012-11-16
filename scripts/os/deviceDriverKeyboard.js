@@ -12,7 +12,9 @@ function DeviceDriverKeyboard() {                   // Add or override specific 
     // this.buffer = "";    // TODO: Do we need this?
 }
 
-// Maps a key code (except letters) to the shifted form of it's character
+/**
+ * Maps a key code (except letters) to the shifted form of it's character.
+ */
 DeviceDriverKeyboard.prototype.shiftedSymbols = 
 {
     '`': '~',
@@ -39,7 +41,9 @@ DeviceDriverKeyboard.prototype.shiftedSymbols =
     '\\': '|'
 };
 
-// Maps JavaScript to ASCII character codes (at least the ones we care about).
+/** 
+ * Maps JavaScript to ASCII character codes (at least the ones we care about).
+ */
 DeviceDriverKeyboard.prototype.specialSymbolCodes = 
 {
     192: 96, // `
@@ -60,7 +64,7 @@ DeviceDriverKeyboard.prototype.specialSymbolCodes =
 DeviceDriverKeyboard.prototype.driverEntry = function()
 {
     // Initialization routine for this, the kernel-mode Keyboard Device Driver.
-    this.status = "Loaded";
+    this.status = "Loaded.";
     // More?
 };
 
@@ -95,9 +99,9 @@ DeviceDriverKeyboard.prototype.isr = function(params)
     }
     else if ( ((keyCode >= 48) && (keyCode <= 57))   ||  // digits...
               ((keyCode >= 186) && (keyCode <= 192)) ||  // special characters...
-              ((keyCode >= 219) && (keyCode <= 222)))    // more special characters...
+              ((keyCode >= 219) && (keyCode <= 222)) )   // more special characters...
     {
-        // Special keys like `, -, =, et cetera, produce JavaScript codes - convert to ascii
+        // Special keys like `, -, =, et cetera, produce JavaScript codes - convert to ASCII
         if (keyCode > 127)
             keyCode = this.specialSymbolCodes[keyCode];
             
