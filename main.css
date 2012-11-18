@@ -34,13 +34,6 @@ img
     background-color: transparent;
 }
 
-#backgroundCircuit
-{
-    background-image: url('images/background-circuit.png');
-    background-position: center;
-    background-repeat: repeat;
-}
-
 .container
 {
 	position: absolute;
@@ -53,6 +46,19 @@ img
     height: 2px;
     background-image: url('images/separator-h.png');
     background-repeat: repeat-y;
+}
+
+.separator, hr
+{
+	clear: both;
+}
+
+.headerButton
+{
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    border: none;
 }
 
 #mainContainer
@@ -118,14 +124,6 @@ img
 
 /* Buttons */
 
-.headerButton
-{
-    width: 32px;
-    height: 32px;
-    background-color: transparent;
-    border: none;
-}
-
 #btnStartOS
 {
     background-image: url('images/button-power.png');
@@ -178,7 +176,7 @@ img
 	margin: auto;
 	position: relative;
     width: 900px;
-    min-height: 900px;
+    min-height: 600px;
 }
 
 #mainContent div
@@ -288,16 +286,56 @@ img
 	background-color: #AAAAAA;
 }	
 
-/* Memory Display */
+/* Memory/HDD Display */
 #memoryContainer
 {
+	background-image: url('images/background.jpg');
 	position: absolute;
 	top: 233px;
 	left: 125px;
 }
 
+#memoryHeader
+{
+	width: 100%;
+	height: 17px;
+	background-image: url('images/memory-header.png');
+	background-repeat: no-repeat;
+}
+
+#memoryHeader:hover
+{
+	background-image: url('images/memory-header-hover.png');
+	cursor: pointer;
+}
+
+#hddHeader
+{
+	display: none;
+	width: 100%;
+	height: 17px;
+	background-image: url('images/hdd-header.png');
+	background-repeat: no-repeat;
+}
+
+#hddHeader:hover
+{
+	background-image: url('images/hdd-header-hover.png');
+	cursor: pointer;
+}
+
+#hddExpandedHeader
+{
+	width: 100%;
+	height: 17px;
+	display: none;
+	background-image: url('images/hdd-header-nomem.png');
+	background-repeat: no-repeat;
+}
+
 #memoryDisplay
 {
+	position: relative;
 	padding: 0 2px;
 	width: 246px;
 	height: 218px;
@@ -324,6 +362,84 @@ img
 	width: 55px;
 }
 
+#hddDisplay
+{
+	position: relative;
+	display: none;
+	padding: 0 2px;
+	width: 246px;
+	height: 218px;
+	border: 2px solid #666;
+	overflow-x: hidden;
+	overflow-y: scroll;
+    white-space: nowrap;
+    font-family: monospace;
+    font-size: 10pt;
+}
+
+#hddDisplay div
+{
+	margin: 0;
+	float: left;
+}
+
+#hddOptions
+{
+	position: absolute;
+	display: none;
+	margin-left: 2px;
+	padding: 0 3px 3px 2px;
+	top: 30px;
+	left: 252px;
+	border: 2px solid #666;
+	border-left: none;
+	opacity: 0.5;
+}
+
+#hddOptions:hover
+{
+	opacity: 1;
+}
+
+.hddButton
+{
+	width: 16px;
+	height: 16px;
+	border: none;
+	cursor: pointer;
+}
+
+#btnRefreshHdd 
+{
+	background-image: url('images/hdd-refresh.png');
+}
+
+#btnRefreshHdd:hover
+{
+	background-image: url('images/hdd-refresh-hover.png');
+}
+
+#btnExpandHdd
+{
+	background-image: url('images/hdd-expand.png');
+}
+
+#btnExpandHdd:hover
+{
+	background-image: url('images/hdd-expand-hover.png');
+}
+
+#btnRestoreHdd
+{
+	display: none;
+	background-image: url('images/hdd-restore.png');
+}
+
+#btnRestoreHdd:hover
+{
+	background-image: url('images/hdd-restore-hover.png');
+}
+
 /* Ready Queue */
 #readyQueueContainer
 {
@@ -334,7 +450,7 @@ img
 
 #readyQueueDisplay
 {
-	width: 247px;
+	width: 250px;
 	height: 96px;
 	border: 2px solid #666;
 	overflow-x: hidden;
@@ -353,7 +469,7 @@ img
 	text-align: right;
 }
 
-#readyQueueDisplayTable tr:first-of-type td /* "Header" row */
+#readyQueueDisplayTable tr:first-of-type td /* Header row */
 {
 	border-bottom: 1px solid #666;
 }
@@ -386,4 +502,5 @@ img
     background-image: url('images/background.jpg');
     background-repeat: repeat;
     border: none;
+    color: #444;
 }

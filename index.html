@@ -13,6 +13,7 @@
     <!-- Supplemental -->
     <script type="text/javascript" src="scripts/supplemental/jquery-1.8.1.min.js"></script>
     <script type="text/javascript" src="scripts/supplemental/jquery-ui-1.8.23.custom.min.js"></script>
+    <script type="text/javascript" src="scripts/supplemental/jquery.flip.min.js"></script>
     
     <!-- Utilities -->
     <script type="text/javascript" src="scripts/util/queue.js"></script>
@@ -26,12 +27,14 @@
     
     <script type="text/javascript" src="scripts/host/cpu.js"></script>
     <script type="text/javascript" src="scripts/host/memory.js"></script>
+    <script type="text/javascript" src="scripts/host/hardDrive.js"></script>
     
     <script type="text/javascript" src="scripts/host/control.js"></script>
     <script type="text/javascript" src="scripts/host/controlMode.js"></script>
     <script type="text/javascript" src="scripts/host/controlLog.js"></script>
     <script type="text/javascript" src="scripts/host/controlCpuDisplay.js"></script>
     <script type="text/javascript" src="scripts/host/controlMemoryDisplay.js"></script>
+    <script type="text/javascript" src="scripts/host/controlHardDriveDisplay.js"></script>
     <script type="text/javascript" src="scripts/host/controlReadyQueueDisplay.js"></script>
     <script type="text/javascript" src="scripts/host/controlProgramInput.js"></script>
     
@@ -43,6 +46,7 @@
     <script type="text/javascript" src="scripts/os/interrupt.js"></script>
     <script type="text/javascript" src="scripts/os/deviceDriver.js"></script>
     <script type="text/javascript" src="scripts/os/deviceDriverKeyboard.js"></script>
+    <script type="text/javascript" src="scripts/os/deviceDriverHardDrive.js"></script>
     
     <script type="text/javascript" src="scripts/os/memoryManager.js"></script>
     <script type="text/javascript" src="scripts/os/pcb.js"></script>
@@ -162,11 +166,41 @@
                 		<img src="images/button-ss.png" />&nbsp;Step&nbsp;
                 	</div>
         		</div>
-        		<!-- Memory Display -->
+        		<!-- Memory/HDD Display -->
         		<div id="memoryContainer">
-        			<div>Memory</div>
+        			<div id="memoryHeader" onclick="Control.toggleMemoryHddDisplay()"></div>
+        			<div id="hddHeader" onclick="Control.toggleMemoryHddDisplay()"></div>
+        			<div id="hddExpandedHeader"></div>
         			<div id="memoryDisplay"></div>
+        			<div id="hddDisplay"
+        		         <!--onblur="HardDriveDisplay.restore()"-->
+        		         tabindex="50">
+        			</div>
+        			<div id="hddOptions">
+    					<input type="button"
+    					       id="btnRefreshHdd"
+    					       title="Refresh"
+    					       class="hddButton"
+    					       onclick="HardDriveDisplay.update()"
+    					/>
+    					<br>
+    					<input type="button"
+    					       id="btnExpandHdd"
+    					       title="Expand"
+    					       class="hddButton"
+    					       onclick="HardDriveDisplay.expand()"
+    					/>
+    					<input type="button"
+    					       id="btnRestoreHdd"
+    					       title="Restore"
+    					       class="hddButton"
+    					       onclick="HardDriveDisplay.restore()"
+    					/>
+    					<!-- <img src="images/hdd-refresh.png" />
+    					<img src="images/hdd-expand.png" /> -->
+    				</div>
         		</div>
+        		
         		<!-- Program Input -->
         		<div id="programInputContainer">
 	        		<div>Program Input</div>

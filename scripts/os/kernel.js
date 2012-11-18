@@ -56,11 +56,14 @@ Kernel.bootstrap = function() // Page 8.
     Kernel.trace("Loading the keyboard device driver.");
     Kernel.keyboardDriver = new DeviceDriverKeyboard();
     Kernel.keyboardDriver.driverEntry();
-    Kernel.trace(Kernel.keyboardDriver.status);    
+    Kernel.trace(Kernel.keyboardDriver.status);   
+    // Load the Hard Drive Device Driver 
+    Kernel.trace("Loading the hard drive device driver.");
+    Kernel.hddDriver = new DeviceDriverHDD();
+    Kernel.hddDriver.driverEntry();
+    Kernel.trace(Kernel.hddDriver.status);
     
-    // More?
-    
-    // Enable the OS Interrupts.  (Not the CPU clock interrupt, as that is done in the hardware sim.)
+    // Enable the OS Interrupts (Not the CPU clock interrupt, as that is done in the control).
     Kernel.trace("Enabling the interrupts.");
     Kernel.enableInterrupts();
     

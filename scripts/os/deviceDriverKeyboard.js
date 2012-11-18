@@ -110,9 +110,9 @@ DeviceDriverKeyboard.prototype.isr = function(params)
             chr = this.shiftedSymbols[chr];
         Kernel.inputQueue.enqueue(chr);
     }
-    else if ((keyCode == 32) ||   // space
-             (keyCode == 13) ||   // enter
-             (keyCode == 8))      // backspace
+    else if ( (keyCode == 32) ||   // space
+              (keyCode == 13) ||   // enter
+              (keyCode == 8) )     // backspace
     {
         chr = String.fromCharCode(keyCode);
         Kernel.inputQueue.enqueue(chr); 

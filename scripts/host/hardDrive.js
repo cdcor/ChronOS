@@ -5,13 +5,13 @@
    ---------- */
 
 // Number of tracks
-HardDrive.tracks = 4;
+HardDrive.TRACKS = 4;
 // Number of sectors
-HardDrive.sectors = 8;
+HardDrive.SECTORS = 8;
 // Number of blocks per track and sector
-HardDrive.blocksPer = 8;
+HardDrive.BLOCKS_PER = 8;
 // Block size in bytes
-HardDrive.blockSize = 8;
+HardDrive.BLOCK_SIZE = 8;
 
 // The disk index which refers to the section of local storage this disk will refer to. That is,
 //   if two hard drives are created with index 0, they will refer to the same section of storage, 
@@ -28,10 +28,10 @@ function HardDrive()
 		throw "Cannot create hard drive; local storage is not supported.";
 	
 	// Number of tracks, sectors, and blocks, and bytes per block
-	this.tracks = HardDrive.tracks;
-	this.sectors = HardDrive.sectors;
-	this.blocksPer = HardDrive.blocksPer;
-	this.blockSize = HardDrive.blockSize;
+	this.tracks = HardDrive.TRACKS;
+	this.sectors = HardDrive.SECTORS;
+	this.blocksPer = HardDrive.BLOCKS_PER;
+	this.blockSize = HardDrive.BLOCK_SIZE;
 	
 	// Size in blocks
 	this.size = this.tracks * this.sectors * this.blocksPer;
@@ -47,9 +47,9 @@ function HardDrive()
 /**
  * Returns the data at the specified TSB.
  * 
- * @param {String} track the track
- * @param {String} sector the sector
- * @param {String} block the block
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
  * 
  * @return {String} the data
  */
@@ -61,10 +61,10 @@ HardDrive.prototype.read = function(track, sector, block)
 /**
  * Writes the data at the specified TSB.
  * 
- * @param {String} track the track
- * @param {String} sector the sector
- * @param {String} block the block
- * @param {String} data the data to write
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
+ * @param {Object} data the data to write
  */
 HardDrive.prototype.write = function(track, sector, block, data)
 {
@@ -73,24 +73,20 @@ HardDrive.prototype.write = function(track, sector, block, data)
 	if (data.length > this.blockSize * 16)
 		throw "Data exceeds block size";
 	
-	localStorage.setItem(this.toIndex(track, sector, block), "");
+	localStorage.setItem(this.toIndex(track, sector, block), data);
 };
 
 /**
  * Converts the specified TSB to an index representing the key in local storage.
  * 
- * @param {String} track the track
- * @param {String} sector the sector
- * @param {String} block the block
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
  * 
  * @return {Number} the index/key 
  */
 HardDrive.prototype.toIndex = function(track, sector, block)
 {
-	track = parseInt(track, 16);
-	sector = parseInt(sector, 16);
-	block = parseInt(block, 16);
-	
 	// This check is lengthy operation-wise, but necessary to avoid possible very bad logical errors.
 	//   It does not check for non-negative parameters (that does seem a bit excessive)
 	if (track > this.tracks || sector > this.sectors || block > this.blocksPer)

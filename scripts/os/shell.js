@@ -40,7 +40,7 @@ Shell.prototype.init = function()
     // shutdown
     sc = new ShellCommand();
     sc.command = "shutdown";
-    sc.description = "- Shuts down the virtual OS but leaves the underlying hardware simulation running.";
+    sc.description = "- Shuts down the virtual OS."; // but leaves the underlying hardware simulation running.";
     sc.funct = shellShutdown;
     this.commandList.push(sc);
 
@@ -114,6 +114,8 @@ Shell.prototype.init = function()
     sc.funct = ControlMode.toggleKlingonMode;
     this.commandList.push(sc);
     
+    // ---------- Processes ----------
+    
     // load
     sc = new ShellCommand();
     sc.command = "load";
@@ -156,10 +158,15 @@ Shell.prototype.init = function()
 	sc.funct = shellKillProcess;
 	this.commandList.push(sc);
 
-    // processes - list the running processes and their IDs
-    // kill <id> - kills the specified process id.
+	// ---------- File management ----------
 
-    //
+	// format
+	sc = new ShellCommand();
+	sc.command = "format"
+	sc.description = "- Formats the hard drive.";
+	sc.funct = shellFormatHardDrive;
+	this.commandList.push(sc);
+
     // Display the initial prompt.
     this.putPrompt();
 };
@@ -577,4 +584,9 @@ function shellKillProcess(args)
 	}
 	else
 		_StdIn.putText("Usage: kill <PID>  Please supply a process ID.");
+}
+
+function shellFormatHardDrive()
+{
+	Kernel.hddDriver.format();
 }

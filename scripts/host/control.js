@@ -38,6 +38,7 @@ Control.init = function()
     
     CpuDisplay.init();
     MemoryDisplay.init();
+    HardDriveDisplay.init();
     ReadyQueueDisplay.init();
     
     ProgramInput.init();
@@ -186,6 +187,53 @@ Control.hostReset = function(button)
     }
 };
 
+Control.memoryDisplayOn = true
+
+Control.toggleMemoryHddDisplay = function()
+{
+	var controlFlip;
+	
+	if (Control.memoryDisplayOn)
+	{
+		controlFlip = function() // Switch to HDD
+		{
+			$("#memoryHeader").hide();
+			$("#memoryDisplay").hide();
+			$("#hddHeader").show();
+			$("#hddDisplay").show();
+			$("#hddOptions").show();
+		}
+	}
+	else
+	{
+		controlFlip = function() // Switch to Memory
+		{
+			$("#hddHeader").hide();
+			$("#hddDisplay").hide();
+			$("#hddOptions").hide();
+			$("#memoryHeader").show();
+			$("#memoryDisplay").show();
+		}
+	}
+	
+	Control.memoryDisplayOn = !Control.memoryDisplayOn;
+	
+	// Plugin interprets transparent as white, so make background color close to body background first.
+	$("#memoryContainer").css("background-color", "#E6E6E6");
+	
+	$("#memoryContainer").flip({
+		direction :'rl',
+		color : "#E6E6E6",
+		onAnimation : controlFlip,
+		onEnd : function() {
+			$("#memoryContainer").css("background-color", "transparent");
+			// Update when after switching to HDD display.
+			if (!Control.memoryDisplayOn)
+				HardDriveDisplay.update();
+		}
+	});
+}
+
 Control.hardwareClockId = null;
 Control.singleStep = false;
 
@@ -229,8 +277,10 @@ Control.clockPulse = function(button)
    	if (!_CPU.isExecuting || !Control.singleStep || button != null)
    	{
 	    CpuDisplay.update();
-	    MemoryDisplay.update();
 	    ReadyQueueDisplay.update();
+	    
+	    if (Control.memoryDisplayOn)
+	    	MemoryDisplay.update();
     }
 };
 
