@@ -47,6 +47,13 @@ HardDriveDisplay.update = function()
 			{
 				currentData = data[t][s][b];
 				
+				if (!currentData)
+				{
+					HardDriveDisplay.display.html("Drive is corrupted.<br><br>" + 
+							"Run shell command 'format'.");
+					return;
+				}
+				
 				displayData += '<div><strong>' + t + ':' + s + ':' + b + '</strong> '
 				               + currentData.substr(0, 2) + ' ' // Status
 				               + currentData.substr(2, 6) + ' ' // TSB
