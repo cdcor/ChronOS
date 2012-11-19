@@ -218,19 +218,11 @@ Control.toggleMemoryHddDisplay = function()
 	
 	Control.memoryDisplayOn = !Control.memoryDisplayOn;
 	
-	// Plugin interprets transparent as white, so make background color close to body background first.
-	$("#memoryContainer").css("background-color", "#E6E6E6");
+	if (!Control.memoryDisplayOn)
+		HardDriveDisplay.update();
 	
-	$("#memoryContainer").flip({
-		direction :'rl',
-		color : "#E6E6E6",
-		onAnimation : controlFlip,
-		onEnd : function() {
-			$("#memoryContainer").css("background-color", "transparent");
-			// Update when after switching to HDD display.
-			if (!Control.memoryDisplayOn)
-				HardDriveDisplay.update();
-		}
+	$("#memoryContainer").rotate3Di('toggle', 'slow', {
+		sideChange : controlFlip
 	});
 }
 
