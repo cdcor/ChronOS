@@ -5,7 +5,8 @@
    ---------- */
 
 File.STATUS_AVAILABLE = 0;
-File.STATUS_OCCUPIED = 1;
+File.STATUS_OCCUPIED_TEXT = 1;
+File.STATUS_OCCUPIED_HEX = 2;
 
 // The maximum size of the data per block in bytes. For now, 4 is a magic number, relying on the 
 //   number of tracks, sectors, and blocks per to be 4, 8, and 8, respectively.
@@ -21,23 +22,21 @@ File.DATA_SIZE = HardDrive.BLOCK_SIZE - 4;
  * @param {Number} block the block of the TSB this file chains to
  * @param {String} data the data stored in this file.
  */
-function File(fileStrOrStatus, track, sector, block, data)
+function File(data)
 {
 	// Status and linked TSB
-	this.status = null;
-	this.track = null;
-	this.sector = null;
-	this.block = null;
+	this.status = File.STATUS_OCCUPIED_TEXT;
+	this.track = 0;
+	this.sector = 0;
+	this.block = 0;
 	// The data
-	this.data = null;
+	this.data = 0;
 	
-	if (fileStrOrStatus != null && track != null && sector != null && block != null)
-		this.setWithInfo(fileStrOrStatus, track, sector, block);
-	else if (fileStrOrStatus)
-		this.setWithFileString(fileStrOrStatus);
-		
 	if (data)
+	{
+		if (true)
 		this.data = data;
+	}
 }
 
 File.prototype.setWithFileString = function(fileStr)
@@ -145,3 +144,11 @@ File.revertData = function(data)
 	
 	return revertedData;
 };
+
+File.fileFromStr = function(fileStr)
+{
+	var file = new File();
+	file.setWithFileString(fileStr);
+	
+	return file;
+}
