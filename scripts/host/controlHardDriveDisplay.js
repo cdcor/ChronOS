@@ -8,6 +8,8 @@ HardDriveDisplay.container = null;
 HardDriveDisplay.display = null;
 HardDriveDisplay.displayOptions = null;
 
+HardDriveDisplay.hoverInfo = null;
+
 HardDriveDisplay.regularTop = null;
 HardDriveDisplay.regularLeft = null;
 HardDriveDisplay.regularWidth = null;
@@ -21,6 +23,21 @@ HardDriveDisplay.init = function()
 	HardDriveDisplay.container = $("#memoryContainer");
 	HardDriveDisplay.display = $("#hddDisplay");
 	HardDriveDisplay.displayOptions = $("#hddOptions");
+	
+	HardDriveDisplay.hoverInfo = $("#hddHoverInfo");
+	
+	HardDriveDisplay.display.mouseenter(function() {
+		HardDriveDisplay.hoverInfo.show();
+	});
+	
+	HardDriveDisplay.display.mouseleave(function() {
+		HardDriveDisplay.hoverInfo.hide();
+	});	
+	
+	$(document).mousemove(function(e) {
+		HardDriveDisplay.hoverInfo.css("left", e.pageX);
+		HardDriveDisplay.hoverInfo.css("top", e.pageY + 10);
+   	});
 	
 	HardDriveDisplay.regularTop = HardDriveDisplay.container.css("top");
 	HardDriveDisplay.regularLeft = HardDriveDisplay.container.css("left");
@@ -54,11 +71,11 @@ HardDriveDisplay.update = function()
 					return;
 				}
 				
-				displayData += '<div><strong>' + t + ':' + s + ':' + b + '</strong> '
+				displayData += '<div><strong>' + t + ':' + s + ':' + b + '&nbsp;</strong><div class="hddData">'
 				               + currentData.substr(0, 2) + ' ' // Status
 				               + currentData.substr(2, 6) + ' ' // TSB
 				               + currentData.substr(8)
-				               + '&nbsp;&nbsp;</div>';
+				               + '</div></div>';
 				
 				row++;
 				
@@ -71,6 +88,34 @@ HardDriveDisplay.update = function()
 	}
 	
 	HardDriveDisplay.display.html(displayData);
+	
+	HardDriveDisplay.setHoverFunction();
+};
+
+HardDriveDisplay.setHoverFunction = function()
+{
+	var blocks = $(".hddData"), block;
+	
+	for (var i = 0; i < blocks.length; i++)
+	{
+		block = $(blocks[i]);
+		
+		block.mouseenter(function() {
+			HardDriveDisplay.hoverInfo.html(HardDriveDisplay.toDisplayTable(new File($(this).html())));
+		});
+	}
+};
+
+HardDriveDisplay.toDisplayTable = function(file)
+{
+	var status = file.status === File.STATUS_AVAILABLE ? "Available" : "Occupied";
+	
+	var table = '<table><tr><td>Status</td><td>Linked TSB</td><td>Data</td></tr>';
+	
+	table += '<tr><td>' + status + '</td><td>' + file.track + ':' + file.sector
+		     + ':' + file.block + '</td><td>' + file.data + '</td></tr></table>';
+		     
+	return table;
 };
 
 HardDriveDisplay.expand = function()
@@ -85,16 +130,16 @@ HardDriveDisplay.expand = function()
 	
 	HardDriveDisplay.container.animate({
 		top: "1px",
-		left: "-520px"
+		left: "-628px" // "-520px"
 	}, HardDriveDisplay.animateSpeed, "swing");
 	
 	HardDriveDisplay.display.animate({
-		width: "891px",
+		width: "1106px", // "891px"
 		height: "580px"
 	}, HardDriveDisplay.animateSpeed, "swing");
 	
 	HardDriveDisplay.displayOptions.animate({
-		left: "897px"
+		left: "1112px" // "897px"
 	}, HardDriveDisplay.animateSpeed, "swing");
 };
 

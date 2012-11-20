@@ -11,6 +11,8 @@
 
 function Kernel() {}
 
+Kernel.MBR = new File(1, 0, 0, 0, "MBR");
+
 Kernel.interruptQueue = null;
 Kernel.buffers = null;
 Kernel.inputQueue = null; 

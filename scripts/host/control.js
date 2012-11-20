@@ -187,7 +187,7 @@ Control.hostReset = function(button)
     }
 };
 
-Control.memoryDisplayOn = true
+Control.memoryDisplayOn = true;
 
 Control.toggleMemoryHddDisplay = function()
 {
@@ -218,12 +218,11 @@ Control.toggleMemoryHddDisplay = function()
 	
 	Control.memoryDisplayOn = !Control.memoryDisplayOn;
 	
+	// Update HDD display when switching to it.
 	if (!Control.memoryDisplayOn)
 		HardDriveDisplay.update();
 	
-	$("#memoryContainer").rotate3Di('toggle', 'slow', {
-		sideChange : controlFlip
-	});
+	$("#memoryContainer").rotate3Di('toggle', 'slow', { sideChange : controlFlip });
 }
 
 Control.hardwareClockId = null;

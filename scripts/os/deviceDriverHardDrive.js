@@ -51,7 +51,7 @@ DeviceDriverHDD.prototype.isr = function(params)
 			this.format();
 			break;
 		default:
-			throw "Invalid HDD Driver command";
+			throw "Invalid HDD Driver command.";
 	}
 };
 
@@ -120,6 +120,8 @@ DeviceDriverHDD.prototype.format = function()
 			}
 		}
 	}
+	
+	this.hardDrive.write(0, 0, 0, Kernel.MBR.toFileString());
 };
 
 /**

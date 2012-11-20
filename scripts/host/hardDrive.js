@@ -11,7 +11,7 @@ HardDrive.SECTORS = 8;
 // Number of blocks per track and sector
 HardDrive.BLOCKS_PER = 8;
 // Block size in bytes
-HardDrive.BLOCK_SIZE = 8;
+HardDrive.BLOCK_SIZE = 64;
 
 // The disk index which refers to the section of local storage this disk will refer to. That is,
 //   if two hard drives are created with index 0, they will refer to the same section of storage, 
@@ -71,7 +71,7 @@ HardDrive.prototype.write = function(track, sector, block, data)
 	// Ensure data doesn't exceed block size. Data is in hex, each character is then 4 bits, so the
 	//   block size * 16 will yield the maximum length of the data string.
 	if (data.length > this.blockSize * 16)
-		throw "Data exceeds block size";
+		throw "Data exceeds block size.";
 	
 	localStorage.setItem(this.toIndex(track, sector, block), data);
 };

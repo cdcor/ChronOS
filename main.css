@@ -377,10 +377,15 @@ img
     font-size: 10pt;
 }
 
-#hddDisplay div
+#hddDisplay div, #hddDisplay div *
 {
 	margin: 0;
 	float: left;
+}
+
+#hddDisplay div:hover
+{
+	background-color: yellow;
 }
 
 #hddOptions
@@ -388,7 +393,7 @@ img
 	position: absolute;
 	display: none;
 	margin-left: 2px;
-	padding: 0 3px 3px 2px;
+	padding: 2px 3px 3px 2px;
 	top: 30px;
 	left: 252px;
 	border: 2px solid #666;
@@ -439,6 +444,40 @@ img
 {
 	background-image: url('images/hdd-restore-hover.png');
 }
+
+#hddHoverInfo
+{
+	display: none;
+	position: absolute;
+	background-image: url('images/background.jpg');
+	border: 2px solid #666;
+	z-index: 200;
+	font-family: monospace;
+	font-size: 10pt;
+}
+
+#hddHoverInfo table
+{
+	border-collapse: collapse;
+}
+
+#hddHoverInfo table tr td
+{
+	padding: 0 5px;
+	border-right: 1px solid #666;
+	text-align: center;
+}
+
+#hddHoverInfo table tr:first-of-type td /* First row */
+{
+	font-family: Tahoma, Arial;
+}
+
+#hddHoverInfo table tr td:last-of-type /* Last column */
+{
+	border: none;
+}
+
 
 /* Ready Queue */
 #readyQueueContainer
