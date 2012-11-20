@@ -101,7 +101,7 @@ HardDriveDisplay.setHoverFunction = function()
 		block = $(blocks[i]);
 		
 		block.mouseenter(function() {
-			HardDriveDisplay.hoverInfo.html(HardDriveDisplay.toDisplayTable(new File($(this).html())));
+			HardDriveDisplay.hoverInfo.html(HardDriveDisplay.toDisplayTable(File.fileFromStr($(this).html())));
 		});
 	}
 };

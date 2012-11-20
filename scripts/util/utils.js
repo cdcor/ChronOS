@@ -42,3 +42,29 @@ function rot13(str)     // An easy-to understand implementation of the famous an
     }
     return retVal;
 }
+
+String.prototype.pad = function(length, character)
+{
+	if (!character)
+		character = " ";
+	
+	var str = this; // This performs a deep copy.
+    
+    while(str.length < length)
+        str += character;
+    
+    return str;
+};
+
+String.prototype.prepad = function(length, character)
+{
+	if (!character)
+		character = " ";
+	
+	var str = this; // This performs a deep copy.
+    
+    while(str.length < length)
+        str = character + str;
+    
+    return str;
+};

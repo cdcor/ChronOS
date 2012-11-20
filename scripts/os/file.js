@@ -6,23 +6,20 @@
 
 File.STATUS_AVAILABLE = 0;
 File.STATUS_OCCUPIED_TEXT = 1;
-File.STATUS_OCCUPIED_HEX = 2;
+File.STATUS_OCCUPIED_BIN = 2;
 
 // The maximum size of the data per block in bytes. For now, 4 is a magic number, relying on the 
 //   number of tracks, sectors, and blocks per to be 4, 8, and 8, respectively.
 File.DATA_SIZE = HardDrive.BLOCK_SIZE - 4;
 
 /**
- * Creates a file for storing text data on the hard drive. This object is for user data, not for swapping.
+ * Creates a file for storing text data on the hard drive. 
  * 
- * @param fileStrOrStatus the data string representing the file read from the hard drive OR the
- *     status of the new file to be created
- * @param {Number} track the track of the TSB this file chains to
- * @param {Number} sector the sector of the TSB this file chains to
- * @param {Number} block the block of the TSB this file chains to
- * @param {String} data the data stored in this file.
+ * @param {String} data the data to be stored in the file
+ * @param {Boolean} isBinaryData true if the data passed to the file is binary data (i.e. it
+ *     should not be converted as text).
  */
-function File(data)
+function File(data, isBinaryData)
 {
 	// Status and linked TSB
 	this.status = File.STATUS_OCCUPIED_TEXT;
@@ -33,10 +30,7 @@ function File(data)
 	this.data = 0;
 	
 	if (data)
-	{
-		if (true)
-		this.data = data;
-	}
+		this.setData(data, isBinaryData);
 }
 
 File.prototype.setWithFileString = function(fileStr)
@@ -53,13 +47,29 @@ File.prototype.setWithFileString = function(fileStr)
 	this.data = File.revertData(fileStr.substr(8));
 };
 
-File.prototype.setWithInfo = function(status, track, sector, block)
+File.prototype.setTSB = function(track, sector, block)
 {
-	this.status = status;
 	this.track = track;
 	this.sector = sector;
 	this.block = block;
 };
+
+File.prototype.setData = function(data, isBinaryData)
+{
+	if (isBinaryData) // Hex
+	{
+		if (data.length % 2 === 1)
+			throw "Binary data must be a whole number of bytes.";
+		
+		this.data = File.revertData(data);
+		this.status = File.STATUS_OCCUPIED_BIN;
+	}
+	else // Text
+	{
+		this.data = data;
+		this.status = File.STATUS_OCCUPIED_TEXT;
+	}
+}
 
 File.prototype.toFileString = function()
 {
@@ -68,14 +78,10 @@ File.prototype.toFileString = function()
 	
 	var str = "", part;
 	
-	part = this.status.toString(16);
-	str += part.length < 2 ? "0" + part : part;
-	part = this.track.toString(16);
-	str += part.length < 2 ? "0" + part : part;
-	part = this.sector.toString(16);
-	str += part.length < 2 ? "0" + part : part;
-	part = this.block.toString(16);
-	str += part.length < 2 ? "0" + part : part;
+	str += this.status.toString(16).prepad(2, "0");
+	str += this.track.toString(16).prepad(2, "0");
+	str += this.sector.toString(16).prepad(2, "0");
+	str += this.block.toString(16).prepad(2, "0");
 	
 	var data = File.convertData(this.data);
 	
@@ -120,8 +126,7 @@ File.convertData = function(data)
     }
     
     // Extend to the data size
-    while (convertedData.length < maxLength)
-    	convertedData += "00";
+    convertedData = convertedData.pad(maxLength, "00");
     	
 	convertedArray.push(convertedData.toUpperCase());
     
@@ -131,8 +136,6 @@ File.convertData = function(data)
 /**
  * Reverts the hard drive data string for a file to a string representation.
  * 
- * For text only.
- *  
  * @param {String} data
  */
 File.revertData = function(data)
@@ -145,10 +148,21 @@ File.revertData = function(data)
 	return revertedData;
 };
 
+File.filesFromData = function(data, isBinaryData)
+{
+	var dataParts = File.convertData(data);
+	var files = [];
+	
+	for (var i = 0; i < dataParts.length; i++)
+		files.push(new File(dataParts[i]), isBinaryData);
+	
+	return files;
+};
+
 File.fileFromStr = function(fileStr)
 {
 	var file = new File();
 	file.setWithFileString(fileStr);
 	
 	return file;
-}
+};
