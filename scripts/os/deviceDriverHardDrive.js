@@ -6,6 +6,9 @@
   
 DeviceDriverHDD.prototype = new DeviceDriver;
 
+// The main directory sectore
+DeviceDriverHDD.DIRECTORY_SECTOR = 0;
+
 /**
  * Creates a new Hard Drive Device Driver. 
  */
@@ -107,8 +110,9 @@ DeviceDriverHDD.prototype.format = function()
 	var data = "";
 	
 	// Each hex character is 4 bits, so the block size in bytes * 2 will yield number of digits per block.
-	for (var i = 0; i < this.hardDrive.blockSize * 2; i++)
-		data += "0";
+	data = data.pad(this.hardDrive.blockSize * 2, "0");
+	//for (var i = 0; i < this.hardDrive.blockSize * 2; i++)
+	//	data += "0";
 	
 	for (t = 0; t < this.hardDrive.tracks; t++)
 	{

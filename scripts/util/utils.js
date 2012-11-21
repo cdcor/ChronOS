@@ -50,7 +50,7 @@ String.prototype.pad = function(length, character)
 	
 	var str = this; // This performs a deep copy.
     
-    while(str.length < length)
+    while (str.length < length)
         str += character;
     
     return str;
