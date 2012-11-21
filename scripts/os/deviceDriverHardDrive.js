@@ -70,6 +70,8 @@ DeviceDriverHDD.prototype.createFile = function(filename)
 	var file = this.findFreeFile();
 	
 	file.setData(filename);
+	
+	
 };
 
 /**
