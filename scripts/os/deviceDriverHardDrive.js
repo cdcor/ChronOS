@@ -128,6 +128,11 @@ DeviceDriverHDD.prototype.format = function()
 	this.hardDrive.write(0, 0, 0, Kernel.MBR.toFileString());
 };
 
+DeviceDriverHDD.prototype.findFreeFile = function()
+{
+	
+}
+
 /**
  * Returns the contents of the hard drive. For display purposes only. 
  */
@@ -154,3 +159,86 @@ DeviceDriverHDD.prototype.getContents = function()
 	
 	return data;
 };
+
+
+/**
+ * A convenience object used to iterate through a hard drive.
+ *  
+ * @param {Object} hardDrive the hardDrive to be iterated.
+ */
+function HardDriveIterator(hardDrive, startingTrack, startingSector, startingBlock)
+{
+	this.hardDrive = hardDrive;
+	
+	this.track = startingTrack ? startingTrack : 0;
+	this.sector = startingSector ? startingSector : 0;
+	this.block = startingBlock ? startingBlock : 0;
+	
+	this.nextElement = this.hardDrive.read(this.track, this.sector, this.block);
+}
+
+/**
+ * Returns the next element of the hardDrive or null if the element doesn't exist.
+ * 
+ * @return {Object} the next element read from the hard drive.
+ */
+HardDriveIterator.prototype.next = function()
+{
+	var data = this.nextElement;
+	this.increment();
+	this.nextElement = this.hardDrive.read(this.track, this.sector, this.block);
+	return data;
+}
+
+/**
+ * Returns true if this iterator has a next element.
+ * 
+ * @return {Boolean} true if this iterator has a next element, false otherwise
+ */
+HardDriveIterator.prototype.hasNext = function()
+{
+	return this.nextElement != null;
+}
+
+/** 
+ * Moves this iterator to the next iteration. 
+ */
+HardDriveIterator.prototype.increment = function()
+{
+	this.block++;
+	
+	if (this.block >= this.hardDrive.blocksPer)
+	{
+		this.block = 0;
+		this.sector++;
+		
+		if (this.sector >= this.hardDrive.sectors)
+		{
+			this.sector = 0;
+			this.track++;
+		}
+	}
+	
+	/*
+	while (this.track < this.hardDrive.tracks)
+	{
+		while (this.sector < this.hardDrive.sectors)
+		{
+			while (this.block < this.hardDrive.blocksPer)
+			{
+				this.block++;
+				return;
+			}
+			
+			this.sector++;
+			this.block = 0;
+			return;
+		}
+		
+		this.track++;
+		this.sector = 0;
+		this.block = 0;
+		return;
+	}
+	*/
+}
