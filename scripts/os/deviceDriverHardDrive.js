@@ -66,6 +66,10 @@ DeviceDriverHDD.prototype.isr = function(params)
 DeviceDriverHDD.prototype.createFile = function(filename)
 {
 	console.log("Create " + filename);
+	
+	var file = this.findFreeFile();
+	
+	file.setData(filename);
 };
 
 /**
@@ -109,26 +113,36 @@ DeviceDriverHDD.prototype.format = function()
 	
 	var data = "";
 	
-	// Each hex character is 4 bits, so the block size in bytes * 2 will yield number of digits per block.
+	// Each hex character is 4 bits, so the block size in bytes * 2 will yield number of hex digits per block.
 	data = data.pad(this.hardDrive.blockSize * 2, "0");
-	//for (var i = 0; i < this.hardDrive.blockSize * 2; i++)
-	//	data += "0";
 	
-	for (t = 0; t < this.hardDrive.tracks; t++)
-	{
-		for (s = 0; s < this.hardDrive.sectors; s++)
-		{
-			for (b = 0; b < this.hardDrive.blocksPer; b++)
-			{
-				this.hardDrive.write(t, s, b, data);
-			}
-		}
-	}
+	var iterator = new HardDriveIterator(this.hardDrive);
+	
+	while (iterator.next())
+		this.hardDrive.write(iterator.track, iterator.sector, iterator.block, data);
 	
 	this.hardDrive.write(0, 0, 0, Kernel.MBR.toFileString());
 };
 
+/**
+ * Finds and return the first free file space to store a file name in the main directory. 
+ * 
+ * @return {File} the first free file space
+ */
 DeviceDriverHDD.prototype.findFreeFile = function()
+{
+	var iterator = new HardDriveIterator(this.hardDrive), element, file;
+	iterator.setTermination(1, 0, 0);
+	
+	while (element = iterator.next())
+	{
+		file = File.fileFromStr(element);
+		if (file.isAvailable())
+			return file;
+	}
+}
+
+DeviceDriverHDD.prototype.findFreeFileSpace = function()
 {
 	
 }
@@ -170,41 +184,86 @@ function HardDriveIterator(hardDrive, startingTrack, startingSector, startingBlo
 {
 	this.hardDrive = hardDrive;
 	
-	this.track = startingTrack ? startingTrack : 0;
-	this.sector = startingSector ? startingSector : 0;
-	this.block = startingBlock ? startingBlock : 0;
+	this.track = startingTrack != null ? startingTrack : 0;
+	this.sector = startingSector != null ? startingSector : 0;
+	this.block = startingBlock != null ? startingBlock - 1 : -1; // Start 1 less as the iterator will increment it
 	
-	this.nextElement = this.hardDrive.read(this.track, this.sector, this.block);
+	this.terminationTrack = this.hardDrive.tracks - 1;
+	this.terminationSector = this.hardDrive.sectors - 1;
+	this.terminationBlock = this.hardDrive.blocksPer - 1;
+	
+	this.terminated = false;
 }
 
 /**
- * Returns the next element of the hardDrive or null if the element doesn't exist.
+ * Test function to test the iterator. 
+ */
+HardDriveIterator.prototype.iterate = function()
+{
+	this.setTermination(0,7,7);
+	
+	var element, i = 0;
+	while (element = this.next())
+	{
+		console.log((i++) + " " + this.track + ":" + this.sector + ":" + this.block + " " + element);
+	}
+	
+	//console.log((i++) + " " + this.track + ":" + this.sector + ":" + this.block + " " + element);
+};
+
+/**
+ * Returns the next element of the hard drive or null if the element doesn't exist.
  * 
- * @return {Object} the next element read from the hard drive.
+ * @return {String} the next element
  */
 HardDriveIterator.prototype.next = function()
 {
-	var data = this.nextElement;
 	this.increment();
-	this.nextElement = this.hardDrive.read(this.track, this.sector, this.block);
-	return data;
-}
+	return this.hardDrive.read(this.track, this.sector, this.block);
+};
+
+/** 
+ * Sets the track, sector, and block to terminate at (inclusive).
+ * 
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
+ */
+HardDriveIterator.prototype.setTermination = function(track, sector, block)
+{
+	this.terminationTrack = track != null ? track : this.terminationTrack;
+	this.terminationSector = sector != null ? sector : this.terminationSector;
+	this.terminationBlock = block != null ? block : this.terminationBlock;
+};
 
 /**
- * Returns true if this iterator has a next element.
- * 
- * @return {Boolean} true if this iterator has a next element, false otherwise
+ * Terminates the iterator. 
  */
-HardDriveIterator.prototype.hasNext = function()
+HardDriveIterator.prototype.terminate = function()
 {
-	return this.nextElement != null;
+	this.track = -1;
+	this.sector = -1;
+	this.block = -1;
+	this.terminated = true;
 }
 
 /** 
  * Moves this iterator to the next iteration. 
  */
 HardDriveIterator.prototype.increment = function()
-{
+{	
+	// Check for termination.
+	if (this.terminated)
+		return;
+	if (this.track === this.terminationTrack &&
+		this.sector === this.terminationSector &&
+		this.block === this.terminationBlock)
+	{
+		this.terminate();
+		return;
+	}
+	
+	// Increment TSB
 	this.block++;
 	
 	if (this.block >= this.hardDrive.blocksPer)
@@ -216,29 +275,11 @@ HardDriveIterator.prototype.increment = function()
 		{
 			this.sector = 0;
 			this.track++;
-		}
-	}
-	
-	/*
-	while (this.track < this.hardDrive.tracks)
-	{
-		while (this.sector < this.hardDrive.sectors)
-		{
-			while (this.block < this.hardDrive.blocksPer)
-			{
-				this.block++;
-				return;
-			}
 			
-			this.sector++;
-			this.block = 0;
-			return;
+			if (this.track > this.hardDrive.tracks)
+			{
+				this.terminate();
+			}
 		}
-		
-		this.track++;
-		this.sector = 0;
-		this.block = 0;
-		return;
 	}
-	*/
-}
+};

@@ -88,6 +88,11 @@ File.prototype.setData = function(data, isBinaryData)
 	}
 }
 
+File.prototype.isAvailable = function()
+{
+	return this.status === File.STATUS_AVAILABLE;
+}
+
 File.prototype.toFileString = function()
 {
 	// File string is of the form: Status T  S  B  Data
