@@ -166,6 +166,34 @@ Shell.prototype.init = function()
 	sc.description = "- Formats the hard drive.";
 	sc.funct = shellFormatHardDrive;
 	this.commandList.push(sc);
+	
+	// create
+	sc = new ShellCommand();
+	sc.command = "create"
+	sc.description = "<file> - Creates a file.";
+	sc.funct = shellCreateFile;
+	this.commandList.push(sc);
+	
+	// read
+	sc = new ShellCommand();
+	sc.command = "read"
+	sc.description = "<file> - Reads a file.";
+	sc.funct = shellReadFile;
+	this.commandList.push(sc);
+	
+	// write
+	sc = new ShellCommand();
+	sc.command = "write"
+	sc.description = "<file> <data> - Writes data to a file.";
+	sc.funct = shellWriteFile;
+	this.commandList.push(sc);
+	
+	// delete
+	sc = new ShellCommand();
+	sc.command = "delete"
+	sc.description = "<file> - Deletes a file.";
+	sc.funct = shellDeleteFile;
+	this.commandList.push(sc);
 
     // Display the initial prompt.
     this.putPrompt();
@@ -588,5 +616,49 @@ function shellKillProcess(args)
 
 function shellFormatHardDrive()
 {
-	Kernel.hddDriver.format();
+	Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, ["format"]));
+}
+
+function shellCreateFile(args)
+{
+	if (args.length > 0)
+	{
+		args.unshift("create");
+		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+	}
+	else
+		_StdIn.putText("Usage: create <file>  Please supply a file name.");
+}
+
+function shellReadFile(args)
+{
+	if (args.length > 0)
+	{
+		args.unshift("read");
+		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+	}
+	else
+		_StdIn.putText("Usage: read <file>  Please supply a file name.");
+}
+
+function shellWriteFile(args)
+{
+	if (args.length > 1)
+	{
+		args.unshift("write");
+		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+	}
+	else
+		_StdIn.putText("Usage: write <file> <data>  Please supply a file and data.");
+}
+
+function shellDeleteFile(args)
+{
+	if (args.length > 0)
+	{
+		args.unshift("delete");
+		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+	}
+	else
+		_StdIn.putText("Usage: delete <file>  Please supply a file name.");
 }

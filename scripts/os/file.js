@@ -2,6 +2,23 @@
    file.js
    
    Represents a file containing user data to be stored on the hard drive.
+   
+   These file objects contain a status, TSB linked to the next block of the file (if it exists), and
+   the data. The data stored in the actual object is the data represented as a string. For example,
+   if the user creates a file named "abc.txt", the data for the file object will be "abc.txt". 
+   
+   When the data is stored to the hard drive it will be converted to a binary representation
+   according to the JavaScript character codes. For example, "a" will be converted to "61" hex.
+   "abc.txt" will be converted to "6162632E747874" hex.
+   
+   Although this wastes local storage (storing 2 hex characters for every single character of a 
+   file), local storage is something we have plenty of. Furthermore, this representation more 
+   accurrately emulates a real hard drive, which stores the data as bit strings. 
+   
+   Binary data to be stored can be specified when setting the data. This will maintain the true form
+   of the data when storing it to the hard drive, which is useful for displaying the data when 
+   swapping, for example. Binary data "ABCD" hex will be stored to the drive as "ABCD", rather than 
+   storing the character codes for each hex digit.
    ---------- */
 
 File.STATUS_AVAILABLE = 0;

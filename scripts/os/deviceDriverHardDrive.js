@@ -62,7 +62,7 @@ DeviceDriverHDD.prototype.isr = function(params)
  */
 DeviceDriverHDD.prototype.createFile = function(filename)
 {
-	
+	console.log("Create " + filename);
 };
 
 /**
@@ -72,7 +72,7 @@ DeviceDriverHDD.prototype.createFile = function(filename)
  */
 DeviceDriverHDD.prototype.readFile = function(filename)
 {
-	
+	console.log("Read " + filename);
 };
 
 /**
@@ -82,7 +82,7 @@ DeviceDriverHDD.prototype.readFile = function(filename)
  */
 DeviceDriverHDD.prototype.writeFile = function(filename, data)
 {
-	
+	console.log("Write " + filename + " " + data);
 };
 
 /**
@@ -92,7 +92,7 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
  */
 DeviceDriverHDD.prototype.deleteFile = function(filename)
 {
-	
+	console.log("Delete " + filename);
 };
 
 /**

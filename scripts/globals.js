@@ -32,6 +32,7 @@ var PROCESS_FAULT_IRQ = 2;
 var PROCESS_TERMINATED_IRQ = 3;
 var CONTEXT_SWITCH_IRQ = 4;
 var SYSTEM_CALL_IRQ = 5;
+var HDD_IRQ = 6;
 
 // Console
 var DEFAULT_FONT = "sans";

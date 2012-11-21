@@ -240,6 +240,9 @@ Kernel.interruptHandler = function(irq, params)
         case SYSTEM_CALL_IRQ:
         	Kernel.systemCallIsr(params);
         	break;
+       	case HDD_IRQ:
+       		Kernel.hddDriver.isr(params);
+       		break;
         default: 
             Kernel.trapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
     }
