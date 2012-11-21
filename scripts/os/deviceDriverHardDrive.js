@@ -68,10 +68,8 @@ DeviceDriverHDD.prototype.createFile = function(filename)
 	console.log("Create " + filename);
 	
 	var file = this.findFreeFile();
-	
 	file.setData(filename);
-	
-	
+	file.writeToDrive(this.hardDrive);
 };
 
 /**
@@ -92,6 +90,53 @@ DeviceDriverHDD.prototype.readFile = function(filename)
 DeviceDriverHDD.prototype.writeFile = function(filename, data)
 {
 	console.log("Write " + filename + " " + data);
+	
+	/*
+	 * filenameFile - the file in the directory containing the name and linked TSB
+	 * files - an array of file objects containing the contents of the file to store.
+	 * currentFile - the current file of the iteration
+	 * file - the file shifted from the front of files
+	 * foundFiles - an array of the final file objects found to store the file's contents
+	 */
+	
+	var filenameFile = this.findFile(filename);
+	var files = File.filesFromData(data);
+	
+	var iterator = new HardDriveIterator(this.hardDrive);
+	iterator.setStart(1, 0, 0);
+	
+	var element, currentFile, file, foundFiles = [];
+	
+	while ((element = iterator.next()) && files.length > 0)
+	{
+		currentFile = File.fileFromStr(element);
+		if (currentFile.isAvailable())
+		{
+			file = files.shift();
+			file.setTSB(iterator.track, iterator.sector, iterator.block);
+			foundFiles.push(file);
+		}
+	}
+	
+	if (files.length > 0)
+	{
+		_StdIn.putText("Not enough free space for contents.");
+		return;
+	}
+	
+	// Link filename file to file contents.
+	filenameFile.setLinkedTSB(foundFiles[0].track, foundFiles[0].sector, foundFiles[0].block);
+	filenameFile.writeToDrive(this.hardDrive);
+
+	// Link all contents files to the following file except for the last and write to drive.
+	for (var i = 0; i < foundFiles.length - 1; i++)
+	{
+		foundFiles[i].setLinkedTSB(foundFiles[i + 1].track, foundFiles[i + 1].sector, foundFiles[i + 1].block);
+		foundFiles[i].writeToDrive(this.hardDrive);
+	}
+	
+	// Write the last file.
+	foundFiles[foundFiles.length - 1].writeToDrive(this.hardDrive);
 };
 
 /**
@@ -127,6 +172,32 @@ DeviceDriverHDD.prototype.format = function()
 };
 
 /**
+ * Finds and returns the specified file.
+ * 
+ * @param {String} filename the file's name
+ *  
+ * @return {File} the file
+ */
+DeviceDriverHDD.prototype.findFile = function(filename)
+{
+	var iterator = new HardDriveIterator(this.hardDrive), element, file, currentFilename;
+	iterator.setTermination(1, 0, 0);
+	
+	while (element = iterator.next())
+	{
+		file = File.fileFromStr(element);
+		currentFilename = file.getData();
+		if (currentFilename === filename)
+		{
+			file.setTSB(iterator.track, iterator.sector, iterator.block);
+			return file;
+		}
+	}
+	
+	throw "File not found.";
+}
+
+/**
  * Finds and return the first free file space to store a file name in the main directory. 
  * 
  * @return {File} the first free file space
@@ -134,20 +205,25 @@ DeviceDriverHDD.prototype.format = function()
 DeviceDriverHDD.prototype.findFreeFile = function()
 {
 	var iterator = new HardDriveIterator(this.hardDrive), element, file;
-	iterator.setTermination(1, 0, 0);
+	iterator.setTermination(1, 0, 0); // Directory is the first track
 	
 	while (element = iterator.next())
 	{
 		file = File.fileFromStr(element);
 		if (file.isAvailable())
+		{
+			file.setTSB(iterator.track, iterator.sector, iterator.block);
 			return file;
+		}
 	}
-}
+	
+	throw "Cannot create file; directory full.";
+};
 
-DeviceDriverHDD.prototype.findFreeFileSpace = function()
+DeviceDriverHDD.prototype.findFreeFileSpace = function(filenameFile, files)
 {
 	
-}
+};
 
 /**
  * Returns the contents of the hard drive. For display purposes only. 
@@ -180,15 +256,15 @@ DeviceDriverHDD.prototype.getContents = function()
 /**
  * A convenience object used to iterate through a hard drive.
  *  
- * @param {Object} hardDrive the hardDrive to be iterated.
+ * @param {HardDrive} hardDrive the hard drive to be iterated through.
  */
-function HardDriveIterator(hardDrive, startingTrack, startingSector, startingBlock)
+function HardDriveIterator(hardDrive)
 {
 	this.hardDrive = hardDrive;
 	
-	this.track = startingTrack != null ? startingTrack : 0;
-	this.sector = startingSector != null ? startingSector : 0;
-	this.block = startingBlock != null ? startingBlock - 1 : -1; // Start 1 less as the iterator will increment it
+	this.track = 0;
+	this.sector = 0;
+	this.block = -1; // Start 1 less as the iterator will increment it
 	
 	this.terminationTrack = this.hardDrive.tracks - 1;
 	this.terminationSector = this.hardDrive.sectors - 1;
@@ -222,6 +298,20 @@ HardDriveIterator.prototype.next = function()
 {
 	this.increment();
 	return this.hardDrive.read(this.track, this.sector, this.block);
+};
+
+/** 
+ * Sets the track, sector, and block to start at (inclusive).
+ * 
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
+ */
+HardDriveIterator.prototype.setStart = function(track, sector, block)
+{
+	this.track = track != null ? track : this.track;
+	this.sector = sector != null ? sector : this.sector;
+	this.block = block != null ? block - 1 : this.block - 1;
 };
 
 /** 

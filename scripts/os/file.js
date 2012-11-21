@@ -37,12 +37,17 @@ File.DATA_SIZE = HardDrive.BLOCK_SIZE - 4;
  *     should not be converted as text).
  */
 function File(data, isBinaryData)
-{
-	// Status and linked TSB
+{	
+	// Status and TSB
 	this.status = File.STATUS_OCCUPIED_TEXT;
 	this.track = 0;
 	this.sector = 0;
 	this.block = 0;
+	
+	// TSB linked to
+	this.linkedTrack = 0;
+	this.linkedSector = 0;
+	this.linkedBlock = 0;
 	// The data
 	this.data = 0;
 	
@@ -58,9 +63,9 @@ File.prototype.setWithFileString = function(fileStr)
 	fileStr = fileStr.replace(/\s+/g, "");
 	
 	this.status = parseInt(fileStr.substr(0, 2), 16);
-	this.track = parseInt(fileStr.substr(2, 2), 16);
-	this.sector = parseInt(fileStr.substr(4, 2), 16);
-	this.block = parseInt(fileStr.substr(6, 2), 16);
+	this.linkedTrack = parseInt(fileStr.substr(2, 2), 16);
+	this.linkedSector = parseInt(fileStr.substr(4, 2), 16);
+	this.linkedBlock = parseInt(fileStr.substr(6, 2), 16);
 	this.data = File.revertData(fileStr.substr(8));
 };
 
@@ -69,6 +74,13 @@ File.prototype.setTSB = function(track, sector, block)
 	this.track = track;
 	this.sector = sector;
 	this.block = block;
+};
+
+File.prototype.setLinkedTSB = function(track, sector, block)
+{
+	this.linkedTrack = track;
+	this.linkedSector = sector;
+	this.linkedBlock = block;
 };
 
 File.prototype.setData = function(data, isBinaryData)
@@ -86,12 +98,18 @@ File.prototype.setData = function(data, isBinaryData)
 		this.data = data;
 		this.status = File.STATUS_OCCUPIED_TEXT;
 	}
+};
+
+File.prototype.getData = function()
+{
+	// Remoe null characters
+	return this.data.replace(/\x00+/g, "");
 }
 
 File.prototype.isAvailable = function()
 {
 	return this.status === File.STATUS_AVAILABLE;
-}
+};
 
 File.prototype.toFileString = function()
 {
@@ -101,9 +119,9 @@ File.prototype.toFileString = function()
 	var str = "", part;
 	
 	str += this.status.toString(16).prepad(2, "0");
-	str += this.track.toString(16).prepad(2, "0");
-	str += this.sector.toString(16).prepad(2, "0");
-	str += this.block.toString(16).prepad(2, "0");
+	str += this.linkedTrack.toString(16).prepad(2, "0");
+	str += this.linkedSector.toString(16).prepad(2, "0");
+	str += this.linkedBlock.toString(16).prepad(2, "0");
 	
 	var data = File.convertData(this.data);
 	
@@ -115,9 +133,9 @@ File.prototype.toFileString = function()
 	return str;
 };
 
-File.prototype.toString = function()
-{
-	return this.status + " " + this.track + ":" + this.sector + ":" + this.block + " " + this.data;
+File.prototype.writeToDrive = function(hardDrive)
+{		
+	hardDrive.write(this.track, this.sector, this.block, this.toFileString());
 }
 
 /**
@@ -176,7 +194,7 @@ File.filesFromData = function(data, isBinaryData)
 	var files = [];
 	
 	for (var i = 0; i < dataParts.length; i++)
-		files.push(new File(dataParts[i]), isBinaryData);
+		files.push(new File(File.revertData(dataParts[i]), isBinaryData));
 	
 	return files;
 };
