@@ -50,6 +50,9 @@ DeviceDriverHDD.prototype.isr = function(params)
 		case "delete":
 			this.deleteFile(filename);
 			break;
+		case "list":
+			this.listFiles();
+			break;
 		case "format":
 			this.format();
 			break;
@@ -57,8 +60,10 @@ DeviceDriverHDD.prototype.isr = function(params)
 			throw "Invalid HDD Driver command.";
 	}
 	
-	if (!Control.memoryDisplayOn)
-		HardDriveDisplay.update();
+	// Update the display for convenience
+	if (Control.memoryDisplayOn)
+		Control.toggleMemoryHddDisplay();
+	HardDriveDisplay.update();
 };
 
 /**
@@ -70,10 +75,19 @@ DeviceDriverHDD.prototype.createFile = function(filename)
 {
 	Kernel.trace("Creating file: " + filename);
 	
-	var file = this.findFreeFile();
-	file.setData(filename);
-	file.setLinkedTSB(0, 0, 0);
-	file.writeToDrive(this.hardDrive);
+	try
+	{
+		var filenameFile = this.findFile(filename);
+		_StdIn.putMessage("Error: File already exists.");
+	}
+	catch (e)
+	{
+		var file = this.findFreeFile();
+		file.setData(filename);
+		file.setLinkedTSB(0, 0, 0);
+		file.writeToDrive(this.hardDrive);
+		_StdIn.putMessage("File created.");
+	}
 };
 
 /**
@@ -84,6 +98,16 @@ DeviceDriverHDD.prototype.createFile = function(filename)
 DeviceDriverHDD.prototype.readFile = function(filename)
 {
 	Kernel.trace("Reading file: " + filename);
+	
+	try
+	{
+		var filenameFile = this.findFile(filename);
+	}
+	catch (e)
+	{
+		_StdIn.putMessage("File not found: " + filename);
+		return;
+	}
 };
 
 /**
@@ -109,9 +133,11 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
 	}
 	catch (e)
 	{
-		_StdIn.putText("File not found: " + filename);
+		_StdIn.putMessage("File not found: " + filename);
 		return;
 	}
+	
+	this.deleteFileChain(filenameFile);
 	
 	var files = File.filesFromData(data);
 	
@@ -133,7 +159,7 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
 	
 	if (files.length > 0)
 	{
-		_StdIn.putText("Not enough free space for contents.");
+		_StdIn.putMessage("Not enough free space for contents.");
 		return;
 	}
 	
@@ -167,7 +193,7 @@ DeviceDriverHDD.prototype.deleteFile = function(filename)
 	}
 	catch (e)
 	{
-		_StdIn.putText("File not found: " + filename);
+		_StdIn.putMessage("File not found: " + filename);
 	}
 };
 
@@ -193,6 +219,26 @@ DeviceDriverHDD.prototype.deleteFileChain = function(file, inclusive)
 		nextFile = this.getFile(nextFile.linkedTrack, nextFile.linkedSector, nextFile.linkedBlock);
 		nextFile.deleteFromDrive(this.hardDrive);
 	} 
+}
+
+DeviceDriverHDD.prototype.listFiles = function()
+{
+	var iterator = new HardDriveIterator(this.hardDrive), element, file;
+	iterator.setTermination(1, 0, 0);
+	
+	_StdIn.advanceLine();
+	
+	while (element = iterator.next())
+	{
+		file = File.fileFromStr(element);
+		if (!file.isAvailable())
+		{
+			_StdIn.putText(" " + file.getData());
+			_StdIn.advanceLine();
+		}
+	}
+	
+	_OsShell.putPrompt();
 }
 
 /**

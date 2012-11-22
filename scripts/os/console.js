@@ -115,6 +115,14 @@ Console.prototype.putText = function(text)
     	this.toggleCursor(true);
 };
 
+Console.prototype.putMessage = function(msg)
+{
+	this.advanceLine();
+	this.putText(msg);
+	this.advanceLine();
+	_OsShell.putPrompt();
+}
+
 Console.prototype.deleteChar = function(chr)
 {
 	this.toggleCursor(false);

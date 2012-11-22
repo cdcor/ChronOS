@@ -171,6 +171,9 @@ Kernel.loadMemory = function(code)
 		// Place on resident list
 		Kernel.residentList[pcb.pid] = pcb;
 		pcb.status = "Resident";
+		
+		if (!Control.memoryDisplayOn)
+			Control.toggleMemoryHddDisplay();
 	}
 	else
 	{

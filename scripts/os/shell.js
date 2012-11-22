@@ -194,6 +194,13 @@ Shell.prototype.init = function()
 	sc.description = "<file> - Deletes a file.";
 	sc.funct = shellDeleteFile;
 	this.commandList.push(sc);
+	
+	// delete
+	sc = new ShellCommand();
+	sc.command = "ls"
+	sc.description = "- Lists all files.";
+	sc.funct = shellListFiles;
+	this.commandList.push(sc);
 
     // Display the initial prompt.
     this.putPrompt();
@@ -661,4 +668,9 @@ function shellDeleteFile(args)
 	}
 	else
 		_StdIn.putText("Usage: delete <file>  Please supply a file name.");
+}
+
+function shellListFiles()
+{
+	Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, ["list"]));
 }

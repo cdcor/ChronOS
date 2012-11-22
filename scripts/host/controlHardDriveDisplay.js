@@ -105,6 +105,8 @@ HardDriveDisplay.update = function()
 	HardDriveDisplay.setHoverFunction();
 };
 
+HardDriveDisplay.linkedBlock = null;
+
 HardDriveDisplay.setHoverFunction = function()
 {
 	var blocks = $(".hddData"), block;
@@ -114,8 +116,21 @@ HardDriveDisplay.setHoverFunction = function()
 		block = $(blocks[i]);
 		
 		block.mouseenter(function() {
-			HardDriveDisplay.hoverInfo.html(HardDriveDisplay.toDisplayTable(File.fileFromStr($(this).html())));
+			var fileStr = $(this).html();
+			HardDriveDisplay.hoverInfo.html(HardDriveDisplay.toDisplayTable(File.fileFromStr(fileStr)));
+			
+			var linkedTSB = parseInt(fileStr.substr(3, 2)) + ":" + parseInt(fileStr.substr(5, 2)) + ":" + parseInt(fileStr.substr(7, 2));
+			if (linkedTSB !== "0:0:0")
+			{
+				HardDriveDisplay.linkedBlock = $('#hddDisplay div:contains("' + linkedTSB + '")');
+				HardDriveDisplay.linkedBlock.css("background-color", "#19F7FF");
+			}
 		});
+		
+		block.mouseleave(function() {
+			if (HardDriveDisplay.linkedBlock)
+				HardDriveDisplay.linkedBlock.css("background-color", "transparent");
+		})
 	}
 };
 
