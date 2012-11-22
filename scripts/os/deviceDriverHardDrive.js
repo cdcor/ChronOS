@@ -56,6 +56,9 @@ DeviceDriverHDD.prototype.isr = function(params)
 		default:
 			throw "Invalid HDD Driver command.";
 	}
+	
+	if (!Control.memoryDisplayOn)
+		HardDriveDisplay.update();
 };
 
 /**
@@ -65,10 +68,11 @@ DeviceDriverHDD.prototype.isr = function(params)
  */
 DeviceDriverHDD.prototype.createFile = function(filename)
 {
-	console.log("Create " + filename);
+	Kernel.trace("Creating file: " + filename);
 	
 	var file = this.findFreeFile();
 	file.setData(filename);
+	file.setLinkedTSB(0, 0, 0);
 	file.writeToDrive(this.hardDrive);
 };
 
@@ -79,7 +83,7 @@ DeviceDriverHDD.prototype.createFile = function(filename)
  */
 DeviceDriverHDD.prototype.readFile = function(filename)
 {
-	console.log("Read " + filename);
+	Kernel.trace("Reading file: " + filename);
 };
 
 /**
@@ -89,7 +93,7 @@ DeviceDriverHDD.prototype.readFile = function(filename)
  */
 DeviceDriverHDD.prototype.writeFile = function(filename, data)
 {
-	console.log("Write " + filename + " " + data);
+	Kernel.trace("Writing to file: " + filename + " " + data);
 	
 	/*
 	 * filenameFile - the file in the directory containing the name and linked TSB
@@ -99,7 +103,16 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
 	 * foundFiles - an array of the final file objects found to store the file's contents
 	 */
 	
-	var filenameFile = this.findFile(filename);
+	try
+	{
+		var filenameFile = this.findFile(filename);
+	}
+	catch (e)
+	{
+		_StdIn.putText("File not found: " + filename);
+		return;
+	}
+	
 	var files = File.filesFromData(data);
 	
 	var iterator = new HardDriveIterator(this.hardDrive);
@@ -146,8 +159,41 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
  */
 DeviceDriverHDD.prototype.deleteFile = function(filename)
 {
-	console.log("Delete " + filename);
+	Kernel.trace("Deleting file: " + filename);
+	
+	try
+	{
+		this.deleteFileChain(this.findFile(filename), true);
+	}
+	catch (e)
+	{
+		_StdIn.putText("File not found: " + filename);
+	}
 };
+
+/**
+ * Deletes (sets as available) the chain of files starting with the specified file.
+ * 
+ * @param {File} file the first file of the chain to delete
+ * @param {Boolean} inclusive true if the first file in the chain should also be deleted. 
+ */
+DeviceDriverHDD.prototype.deleteFileChain = function(file, inclusive)
+{
+	if (inclusive)
+		file.deleteFromDrive(this.hardDrive);
+	
+	if (!file.isLinked())
+		return;
+		
+	var nextFile = this.getFile(file.linkedTrack, file.linkedSector, file.linkedBlock);
+	nextFile.deleteFromDrive(this.hardDrive);
+	
+	while (nextFile.isLinked())
+	{
+		nextFile = this.getFile(nextFile.linkedTrack, nextFile.linkedSector, nextFile.linkedBlock);
+		nextFile.deleteFromDrive(this.hardDrive);
+	} 
+}
 
 /**
  * Formats the hard drive (i.e. zero-fills it) .
@@ -187,7 +233,7 @@ DeviceDriverHDD.prototype.findFile = function(filename)
 	{
 		file = File.fileFromStr(element);
 		currentFilename = file.getData();
-		if (currentFilename === filename)
+		if (!file.isAvailable() && currentFilename === filename)
 		{
 			file.setTSB(iterator.track, iterator.sector, iterator.block);
 			return file;
@@ -195,6 +241,13 @@ DeviceDriverHDD.prototype.findFile = function(filename)
 	}
 	
 	throw "File not found.";
+}
+
+DeviceDriverHDD.prototype.getFile = function(track, sector, block)
+{
+	var file = File.fileFromStr(this.hardDrive.read(track, sector, block));
+	file.setTSB(track, sector, block);
+	return file;
 }
 
 /**

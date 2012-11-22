@@ -49,7 +49,7 @@ function File(data, isBinaryData)
 	this.linkedSector = 0;
 	this.linkedBlock = 0;
 	// The data
-	this.data = 0;
+	this.data = "";
 	
 	if (data)
 		this.setData(data, isBinaryData);
@@ -102,7 +102,7 @@ File.prototype.setData = function(data, isBinaryData)
 
 File.prototype.getData = function()
 {
-	// Remoe null characters
+	// Remove null characters
 	return this.data.replace(/\x00+/g, "");
 }
 
@@ -110,6 +110,11 @@ File.prototype.isAvailable = function()
 {
 	return this.status === File.STATUS_AVAILABLE;
 };
+
+File.prototype.isLinked = function()
+{
+	return !(this.linkedTrack === 0 && this.linkedSector === 0 && this.linkedBlock === 0);
+}
 
 File.prototype.toFileString = function()
 {
@@ -127,16 +132,20 @@ File.prototype.toFileString = function()
 	
 	if (data.length > 1)
 		console.log("WARN: File data spans more than one block. Data will be truncated.");
-	
-	str += data[0];
-	
-	return str;
+
+	return str + data[0];
 };
 
 File.prototype.writeToDrive = function(hardDrive)
 {		
 	hardDrive.write(this.track, this.sector, this.block, this.toFileString());
 }
+
+File.prototype.deleteFromDrive = function(hardDrive)
+{
+	this.status = File.STATUS_AVAILABLE;
+	hardDrive.write(this.track, this.sector, this.block, this.toFileString());
+};
 
 /**
  * Converts the specified data string to a form appropriate for storage on the hard drive.

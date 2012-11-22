@@ -35,7 +35,9 @@ HardDriveDisplay.init = function()
 	});	
 	
 	$(document).mousemove(function(e) {
-		HardDriveDisplay.hoverInfo.css("left", e.pageX);
+		var width = parseInt(HardDriveDisplay.hoverInfo.css("width")) + 4;
+		var windowWidth = parseInt($(window).width());
+		HardDriveDisplay.hoverInfo.css("left", e.pageX + width > windowWidth ? windowWidth - width : e.pageX);
 		HardDriveDisplay.hoverInfo.css("top", e.pageY + 10);
    	});
 	
@@ -48,13 +50,11 @@ HardDriveDisplay.init = function()
 
 HardDriveDisplay.update = function()
 {
-	console.log("Update");
-	
 	var data = Kernel.hddDriver.getContents(), currentData;
 	
 	var displayData = "";
 	
-	var t, s, b, row = 0;
+	var t, s, b, row = 0, zeroCount = 0, breakPlaced = false;
 	
 	for (t = 0; t < data.length; t++)
 	{
@@ -66,16 +66,31 @@ HardDriveDisplay.update = function()
 				
 				if (!currentData)
 				{
-					HardDriveDisplay.display.html("Drive is corrupted.<br><br>" + 
-							"Run shell command 'format'.");
+					HardDriveDisplay.display.html("Drive is corrupted.<br><br>Run shell command 'format'.");
 					return;
 				}
 				
-				displayData += '<div><strong>' + t + ':' + s + ':' + b + '&nbsp;</strong><div class="hddData">'
-				               + currentData.substr(0, 2) + ' ' // Status
-				               + currentData.substr(2, 6) + ' ' // TSB
-				               + currentData.substr(8)
-				               + '</div></div>';
+				if (!(/[^\s0]/).test(currentData)) // All zeros
+					zeroCount++;
+				else
+					zeroCount = 0;
+				
+				// If already placed two rows of zeros or at the end of the iteration
+				if (zeroCount < 2 || ((t === data.length - 1) && (s === data[t].length - 1) && (b >= data[t][s].length - 2)))
+				{
+					displayData += '<div><strong>' + t + ':' + s + ':' + b + '&nbsp;</strong>' 
+				                + '<div class="hddData">'
+				                + currentData.substr(0, 2) + ' ' // Status
+				                + currentData.substr(2, 6) + ' ' // TSB
+				                + currentData.substr(8)          // Data
+				                + '</div></div>';
+					breakPlaced = false;
+				}
+				else if (!breakPlaced)
+				{
+					displayData += '<hr>';
+					breakPlaced = true;
+				}
 				
 				row++;
 				
@@ -83,8 +98,6 @@ HardDriveDisplay.update = function()
 					displayData += '<div class="separator"></div>';
 			}
 		}
-		
-		displayData += '<hr>';
 	}
 	
 	HardDriveDisplay.display.html(displayData);
@@ -112,8 +125,8 @@ HardDriveDisplay.toDisplayTable = function(file)
 	
 	var table = '<table><tr><td>Status</td><td>Linked TSB</td><td>Data</td></tr>';
 	
-	table += '<tr><td>' + status + '</td><td>' + file.track + ':' + file.sector
-		     + ':' + file.block + '</td><td>' + file.data + '</td></tr></table>';
+	table += '<tr><td>' + status + '</td><td>' + file.linkedTrack + ':' + file.linkedSector
+		     + ':' + file.linkedBlock + '</td><td>' + file.data + '</td></tr></table>';
 		     
 	return table;
 };
