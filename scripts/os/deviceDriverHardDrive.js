@@ -102,6 +102,18 @@ DeviceDriverHDD.prototype.readFile = function(filename)
 	try
 	{
 		var filenameFile = this.findFile(filename);
+		var contentsFile = this.getLinkedFile(filenameFile);
+		
+		var contents = contentsFile.getData();
+		
+		while (contentsFile.isLinked())
+		{
+			contentsFile = this.getLinkedFile(contentsFile);
+			contents += contentsFile.getData();
+		}
+		
+		_StdIn.putMessage(contents);
+		return contents;
 	}
 	catch (e)
 	{
@@ -292,12 +304,49 @@ DeviceDriverHDD.prototype.findFile = function(filename)
 	throw "File not found.";
 }
 
+/**
+ * Returns the file located at the TSB of this driver's hard drive or null if the file doesn't exist.
+ * 
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
+ * 
+ * @return {File} the file
+ */
 DeviceDriverHDD.prototype.getFile = function(track, sector, block)
 {
-	var file = File.fileFromStr(this.hardDrive.read(track, sector, block));
-	file.setTSB(track, sector, block);
-	return file;
-}
+	try
+	{
+		var file = File.fileFromStr(this.hardDrive.read(track, sector, block));
+		file.setTSB(track, sector, block);
+		return file;
+	}
+	catch (e)
+	{
+		return null;
+	}
+};
+
+/**
+ * Returns the file linked from the specified file.
+ * 
+ * @param {File} file the linking file
+ * 
+ * @return {File} the linked file
+ */
+DeviceDriverHDD.prototype.getLinkedFile = function(file)
+{
+	try
+	{
+		var linkedFile = File.fileFromStr(this.hardDrive.read(file.linkedTrack, file.linkedSector, file.linkedBlock));
+		linkedFile.setTSB(file.linkedTrack, file.linkedSector, file.linkedBlock);
+		return linkedFile;
+	}
+	catch (e)
+	{
+		return null;
+	}
+};
 
 /**
  * Finds and return the first free file space to store a file name in the main directory. 

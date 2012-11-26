@@ -59,6 +59,8 @@ File.prototype.setWithFileString = function(fileStr)
 {
 	// File string is of the form: Status T  S  B  Data
 	//             Hex Characters: 00     00 00 00 00000000...
+	if (!fileStr)
+		throw "Invalid string to set file.";
 	
 	fileStr = fileStr.replace(/\s+/g, "");
 	
