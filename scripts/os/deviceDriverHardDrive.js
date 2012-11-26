@@ -142,7 +142,7 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
 	var files = File.filesFromData(data);
 	
 	var iterator = new HardDriveIterator(this.hardDrive);
-	iterator.setStart(1, 0, 0);
+	iterator.setStart(0, 7, 7);
 	
 	var element, currentFile, file, foundFiles = [];
 	
@@ -224,7 +224,7 @@ DeviceDriverHDD.prototype.deleteFileChain = function(file, inclusive)
 DeviceDriverHDD.prototype.listFiles = function()
 {
 	var iterator = new HardDriveIterator(this.hardDrive), element, file;
-	iterator.setTermination(1, 0, 0);
+	iterator.setTermination(0, 7, 7);
 	
 	_StdIn.advanceLine();
 	
@@ -257,8 +257,11 @@ DeviceDriverHDD.prototype.format = function()
 	
 	var iterator = new HardDriveIterator(this.hardDrive);
 	
-	while (iterator.next())
+	while (!iterator.terminated)
+	{
+		iterator.next();
 		this.hardDrive.write(iterator.track, iterator.sector, iterator.block, data);
+	}
 	
 	this.hardDrive.write(0, 0, 0, Kernel.MBR.toFileString());
 };
@@ -273,7 +276,7 @@ DeviceDriverHDD.prototype.format = function()
 DeviceDriverHDD.prototype.findFile = function(filename)
 {
 	var iterator = new HardDriveIterator(this.hardDrive), element, file, currentFilename;
-	iterator.setTermination(1, 0, 0);
+	iterator.setTermination(0, 7, 7);
 	
 	while (element = iterator.next())
 	{
@@ -304,7 +307,7 @@ DeviceDriverHDD.prototype.getFile = function(track, sector, block)
 DeviceDriverHDD.prototype.findFreeFile = function()
 {
 	var iterator = new HardDriveIterator(this.hardDrive), element, file;
-	iterator.setTermination(1, 0, 0); // Directory is the first track
+	iterator.setTermination(0, 7, 7); // Directory is the first track
 	
 	while (element = iterator.next())
 	{
@@ -353,7 +356,7 @@ DeviceDriverHDD.prototype.getContents = function()
 
 
 /**
- * A convenience object used to iterate through a hard drive.
+ * A convenience object used to iterate through a hard drive's contents.
  *  
  * @param {HardDrive} hardDrive the hard drive to be iterated through.
  */
