@@ -233,6 +233,9 @@ DeviceDriverHDD.prototype.deleteFileChain = function(file, inclusive)
 	} 
 }
 
+/**
+ * Lists the files to the console.
+ */
 DeviceDriverHDD.prototype.listFiles = function()
 {
 	var iterator = new HardDriveIterator(this.hardDrive), element, file;
@@ -254,7 +257,7 @@ DeviceDriverHDD.prototype.listFiles = function()
 }
 
 /**
- * Formats the hard drive (i.e. zero-fills it) .
+ * Formats the hard drive (i.e. zero-fills it).
  */
 DeviceDriverHDD.prototype.format = function()
 {
