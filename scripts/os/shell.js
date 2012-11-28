@@ -123,6 +123,13 @@ Shell.prototype.init = function()
     sc.funct = shellLoad;
     this.commandList.push(sc);
     
+    // scheduling
+    sc = new ShellCommand();
+    sc.command = "sched";
+    sc.description = "[rr, fcfs, priority] - CPU Scheduling.";
+    sc.funct = shellSetCpuScheduling;
+    this.commandList.push(sc);
+    
     // run
     sc = new ShellCommand();
     sc.command = "run";
@@ -548,6 +555,33 @@ function shellLoad()
 		_StdIn.advanceLine();
 		Kernel.loadMemory(input);
 	}
+}
+
+function shellSetCpuScheduling(args)
+{
+	if (args.length > 0)
+	{
+		switch (args[0])
+		{
+			case "rr":
+				_SchedulingMode = SCHEDULING_ROUND_ROBIN;
+				_StdIn.putText("Scheduling mode set to round robin.");
+				break;
+			case "fcfs":
+				_SchedulingMode = SCHEDULING_FCFS;
+				_StdIn.putText("Scheduling mode set to FCFS.");
+				break;
+			case "priority":
+				_SchedulingMode = SCHEDULING_PRIORITY;
+				_StdIn.putText("Scheduling mode set to priority.");
+				break;
+			default:
+				_StdIn.putText("Invalid scheduling mode.");
+				break;
+		}
+	}
+	else 
+		_StdIn.putText("Usage: sched <mode>  Please supply a scheduling mode.");
 }
 
 function shellRunProcess(args)

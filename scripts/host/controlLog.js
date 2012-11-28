@@ -95,6 +95,8 @@ Log.applyMessageStyle = function(message)
         message = Log.applyStyle(message, '#FF7700');
     else if (message.search(/(emergency|halt|error)/i) != -1)
         message = Log.applyStyle(message, 'red');
+    else if (message.search(/(file|swap)/i) != -1)
+    	message = Log.applyStyle(message, '#7603CE');
     else 
         message = Log.applyStyle(message, 'green');
         

@@ -43,6 +43,10 @@ var FONT_HEIGHT_MARGIN = 4; // Additional space added to font size when advancin
 var KERNEL_MODE = 0;
 var USER_MODE = 1;
 
+var SCHEDULING_ROUND_ROBIN = 0;
+var SCHEDULING_FCFS = 1;
+var SCHEDULING_PRIORITY = 2;
+
 var DEFAULT_SCHEDULING_QUATUM = 6;
 
 
@@ -53,6 +57,8 @@ var _CPU = null;
 var _OSclock = 0; // Page 23.
 
 var _Mode = KERNEL_MODE; // Page 21.
+
+var _SchedulingMode = SCHEDULING_ROUND_ROBIN;
 
 // Default the OS trace to be on.
 var _Trace = true;

@@ -104,8 +104,18 @@ File.prototype.setData = function(data, isBinaryData)
 
 File.prototype.getData = function()
 {
-	// Remove null characters
-	return this.data.replace(/\x00+/g, "");
+	if (this.status === File.STATUS_OCCUPIED_TEXT)
+	{
+		// Remove null characters
+		return this.data.replace(/\x00+/g, "");
+	}
+	
+	if (this.status === File.STATUS_OCCUPIED_BIN)
+	{
+		return File.convertData(this.data)[0];
+	}
+	
+	return null;
 }
 
 File.prototype.isAvailable = function()

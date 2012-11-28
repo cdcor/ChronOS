@@ -6,7 +6,7 @@
   
 DeviceDriverHDD.prototype = new DeviceDriver;
 
-// The main directory sectore
+// The main directory sector 
 DeviceDriverHDD.DIRECTORY_SECTOR = 0;
 
 /**
@@ -33,31 +33,42 @@ DeviceDriverHDD.prototype.driverEntry = function()
 DeviceDriverHDD.prototype.isr = function(params)
 {
 	var command = params[0];
-	var filename = params[1]; // Will be undefined if the command is format.
+	var filename = params[1]; // Will be undefined if the command is format or list.
 	var data = params[2]; // Will be undefined if the command is not write.
 	
-	switch (command)
+	try
 	{
-		case "create":
-			this.createFile(filename);
-			break;
-		case "read":
-			this.readFile(filename);
-			break;
-		case "write":
-			this.writeFile(filename, data);
-			break;
-		case "delete":
-			this.deleteFile(filename);
-			break;
-		case "list":
-			this.listFiles();
-			break;
-		case "format":
-			this.format();
-			break;
-		default:
-			throw "Invalid HDD Driver command.";
+		switch (command)
+		{
+			case "create":
+				this.createFile(filename);
+				_StdIn.putMessage("File created.");
+				break;
+			case "read":
+				_StdIn.putMessage(this.readFile(filename));
+				break;
+			case "write":
+				this.writeFile(filename, data);
+				_StdIn.putMessage("File written.");
+				break;
+			case "delete":
+				this.deleteFile(filename);
+				_StdIn.putMessage("File deleted.");
+				break;
+			case "list":
+				this.listFiles();
+				break;
+			case "format":
+				this.format();
+				_StdIn.putMessage("Format successful.");
+				break;
+			default:
+				Kernel.trapError("Invalid HDD Driver command.");
+		}
+	}
+	catch (e)
+	{
+		_StdIn.putMessage(e);
 	}
 	
 	// Update the display for convenience
@@ -78,7 +89,6 @@ DeviceDriverHDD.prototype.createFile = function(filename)
 	try
 	{
 		var filenameFile = this.findFile(filename);
-		_StdIn.putMessage("Error: File already exists.");
 	}
 	catch (e)
 	{
@@ -86,8 +96,10 @@ DeviceDriverHDD.prototype.createFile = function(filename)
 		file.setData(filename);
 		file.setLinkedTSB(0, 0, 0);
 		file.writeToDrive(this.hardDrive);
-		_StdIn.putMessage("File created.");
+		return;
 	}
+	
+	throw "Error: File already exists.";
 };
 
 /**
@@ -99,27 +111,22 @@ DeviceDriverHDD.prototype.readFile = function(filename)
 {
 	Kernel.trace("Reading file: " + filename);
 	
-	try
+	var filenameFile = this.findFile(filename);
+	
+	if (!filenameFile.isLinked())
+		throw "File contains nothing.";;
+	
+	var contentsFile = this.getLinkedFile(filenameFile);
+	
+	var contents = contentsFile.getData();
+	
+	while (contentsFile.isLinked())
 	{
-		var filenameFile = this.findFile(filename);
-		var contentsFile = this.getLinkedFile(filenameFile);
-		
-		var contents = contentsFile.getData();
-		
-		while (contentsFile.isLinked())
-		{
-			contentsFile = this.getLinkedFile(contentsFile);
-			contents += contentsFile.getData();
-		}
-		
-		_StdIn.putMessage(contents);
-		return contents;
+		contentsFile = this.getLinkedFile(contentsFile);
+		contents += contentsFile.getData();
 	}
-	catch (e)
-	{
-		_StdIn.putMessage("File not found: " + filename);
-		return;
-	}
+	
+	return contents;
 };
 
 /**
@@ -127,7 +134,7 @@ DeviceDriverHDD.prototype.readFile = function(filename)
  * 
  * @param filename the file
  */
-DeviceDriverHDD.prototype.writeFile = function(filename, data)
+DeviceDriverHDD.prototype.writeFile = function(filename, data, binaryData)
 {
 	Kernel.trace("Writing to file: " + filename + " " + data);
 	
@@ -139,22 +146,14 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
 	 * foundFiles - an array of the final file objects found to store the file's contents
 	 */
 	
-	try
-	{
-		var filenameFile = this.findFile(filename);
-	}
-	catch (e)
-	{
-		_StdIn.putMessage("File not found: " + filename);
-		return;
-	}
+	var filenameFile = this.findFile(filename);
 	
 	this.deleteFileChain(filenameFile);
 	
-	var files = File.filesFromData(data);
+	var files = File.filesFromData(data, binaryData);
 	
 	var iterator = new HardDriveIterator(this.hardDrive);
-	iterator.setStart(0, 7, 7);
+	iterator.setStart(1, 0, 0);
 	
 	var element, currentFile, file, foundFiles = [];
 	
@@ -170,10 +169,7 @@ DeviceDriverHDD.prototype.writeFile = function(filename, data)
 	}
 	
 	if (files.length > 0)
-	{
-		_StdIn.putMessage("Not enough free space for contents.");
-		return;
-	}
+		throw "Not enough free space for contents.";
 	
 	// Link filename file to file contents.
 	filenameFile.setLinkedTSB(foundFiles[0].track, foundFiles[0].sector, foundFiles[0].block);
@@ -199,14 +195,7 @@ DeviceDriverHDD.prototype.deleteFile = function(filename)
 {
 	Kernel.trace("Deleting file: " + filename);
 	
-	try
-	{
-		this.deleteFileChain(this.findFile(filename), true);
-	}
-	catch (e)
-	{
-		_StdIn.putMessage("File not found: " + filename);
-	}
+	this.deleteFileChain(this.findFile(filename), true);
 };
 
 /**
@@ -304,7 +293,7 @@ DeviceDriverHDD.prototype.findFile = function(filename)
 		}
 	}
 	
-	throw "File not found.";
+	throw "File not found: " + filename;
 }
 
 /**
@@ -361,9 +350,9 @@ DeviceDriverHDD.prototype.findFreeFile = function()
 	var iterator = new HardDriveIterator(this.hardDrive), element, file;
 	iterator.setTermination(0, 7, 7); // Directory is the first track
 	
-	while (element = iterator.next())
+	while (!iterator.terminated)
 	{
-		file = File.fileFromStr(element);
+		file = File.fileFromStr(iterator.next());
 		if (file.isAvailable())
 		{
 			file.setTSB(iterator.track, iterator.sector, iterator.block);
@@ -374,13 +363,10 @@ DeviceDriverHDD.prototype.findFreeFile = function()
 	throw "Cannot create file; directory full.";
 };
 
-DeviceDriverHDD.prototype.findFreeFileSpace = function(filenameFile, files)
-{
-	
-};
-
 /**
  * Returns the contents of the hard drive. For display purposes only. 
+ * 
+ * @return {Array} the hard drive's contents
  */
 DeviceDriverHDD.prototype.getContents = function()
 {
@@ -451,6 +437,10 @@ HardDriveIterator.prototype.iterate = function()
 HardDriveIterator.prototype.next = function()
 {
 	this.increment();
+	
+	if (this.terminated)
+		return null;
+	
 	return this.hardDrive.read(this.track, this.sector, this.block);
 };
 
