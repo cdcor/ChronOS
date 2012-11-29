@@ -1,5 +1,9 @@
-- I implemented reseting the OS without reloading the page, and it works in reseting everything
-  save page layout which it ocassionally wreaks havoc on. Therefore, I left the reset functionality
-  to reloading the page for now.
+I thought about dropping to the next line when a process ended, but that 
+would mean for every process. Thus, if you run 3 processes at once, the
+console will drop 3 times, a line for every finished process.
 
-- I implemented a cursor in the console; and it's still a little buggy.
+You can still enter commands will programs are running. Commands do not
+internally co-mingle with the output, only on the screen. You just have
+to remember what you've typed.
+
+Cursor's still a little buggy.

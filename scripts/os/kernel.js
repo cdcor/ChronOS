@@ -45,7 +45,7 @@ Kernel.bootstrap = function() // Page 8.
     
     // Process Lists/Queues
     Kernel.residentList = new Array();
-    Kernel.readyQueue = new Queue();
+    Kernel.readyQueue = new PriorityMinQueue();
     
     // Initialize the Console.
     _Console = new Console(Control.getCanvas());
@@ -106,8 +106,7 @@ Kernel.onCpuClockPulse = function(step)
     // This, on the other hand, is the clock pulse from the hardware (or host) that tells the kernel 
     // that it has to look for interrupts and process them if it finds any.
     // Check for an interrupt, are any. Page 560
-
-    // Check for an interrupt, are any. Page 560
+    
     if (Kernel.interruptQueue.size() > 0)
     {
         var interrupt = Kernel.interruptQueue.dequeue();

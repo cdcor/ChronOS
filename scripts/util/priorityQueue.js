@@ -5,6 +5,8 @@
    
    By John Dunham originally for use in rubix_js: https://github.com/mew2057/rubix_js,
    A Rubik's cube solver written by John Dunham and Christopher Cordisco.
+   
+   Modifications by Christopher Cordisco for use in this project.
    -------------- */
 
 /**
@@ -133,6 +135,16 @@ PriorityMinQueue.prototype.heapRebuild = function(index)
     }
 };
 
+PriorityMinQueue.prototype.size = function()
+{
+	var length = 0;
+	
+	for (var i in this.h)
+		length += this.h[i]["v"].length;
+	
+	return length;
+}
+
 /**
  * @return true if empty...
  */
@@ -145,3 +157,21 @@ PriorityMinQueue.prototype.clean = function()
 {
     delete this.h;   
 };
+
+PriorityMinQueue.prototype.getContents = function()
+{
+	if (this.isEmpty())
+		return [];
+	
+	var contents = [], i, value, j;
+	
+	for (i in this.h)
+	{
+		value = this.h[i]["v"]
+		
+		for (j in value)
+			contents.push(value[i]);
+	}
+	
+	return contents;
+}

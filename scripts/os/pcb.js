@@ -13,6 +13,9 @@ function Pcb()
     this.yReg  = 0;  // Y register
     this.zFlag = 0;  // Z-ero flag (Think of it as "isZero")
     
+    this.priority = DEFAULT_PRIORITY;
+    this.arrivalTime = _OSclock;
+    
     this.status = "New";
     
     // For memory; to be set by the MMU.
@@ -35,6 +38,13 @@ Pcb.prototype.setRegisters = function(cpu)
 	this.yReg = cpu.yReg.data;
 	this.zFlag = cpu.zFlag.data;
 };
+
+Pcb.prototype.schedulingPriority = function()
+{
+	if (_SchedulingMode === SCHEDULING_FCFS)
+		return this.arrivalTime;
+	return this.priority;
+}
 
 /**
  * Returns a string representation of this PCB. 

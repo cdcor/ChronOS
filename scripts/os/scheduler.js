@@ -9,6 +9,8 @@
 // The round robin scheduling quantum.
 Kernel.schedulingQuantum = DEFAULT_SCHEDULING_QUATUM;
 
+Kernel.previousQuantum = DEFAULT_SCHEDULING_QUATUM;
+
 // The number of cycles a process has been executing.
 Kernel.processCycles = 0;
 
@@ -27,7 +29,7 @@ Kernel.runProcess = function(pid)
 	{
 		Kernel.trace("Running process: " + pid);
 		// Place on the ready queue.
-		Kernel.readyQueue.enqueue(process);
+		Kernel.readyQueue.insert(process.schedulingPriority(), process);
 		process.status = "Ready";
 		// Remove from resident list.
 		Kernel.residentList[pid] = null;
@@ -51,7 +53,7 @@ Kernel.runAllProcesses = function()
 		{
 			Kernel.trace("Running process: " + process.pid);
 			// Place on the ready queue.
-			Kernel.readyQueue.enqueue(process);
+			Kernel.readyQueue.insert(process.schedulingPriority(), process);
 			process.status = "Ready";
 			// Remove from resident list.
 			Kernel.residentList[i] = null;
@@ -122,7 +124,7 @@ Kernel.scheduleCycle = function(step)
  */
 Kernel.dispatchNextProcess = function()
 {
-	var nextProcess = Kernel.readyQueue.dequeue();
+	var nextProcess = Kernel.readyQueue.remove();
 	
 	Kernel.runningProcess = nextProcess;
 	nextProcess.status = "Running";
@@ -133,6 +135,36 @@ Kernel.dispatchNextProcess = function()
 	
 	_Mode = USER_MODE;
 };
+
+/**
+ * Applies the current scheduling mode to the scheduler. It really only changes the quantum to
+ * differentiate between FCFS and RR. Throws an exception if processes are running.
+ */
+Kernel.applySchedulingMode = function()
+{
+	if (Kernel.runningProcess || Kernel.readyQueue.size() > 0)
+		throw "Cannot apply scheduling mode; Processes are active.";	
+	
+	Kernel.trace("Applying scheduling mode: " + _SchedulingMode);
+	
+	var processes = [];
+	
+	switch (_SchedulingMode)
+	{
+		case SCHEDULING_FCFS:
+			Kernel.previousQuantum = Kernel.schedulingQuantum;
+			Kernel.schedulingQuantum = Number.MAX_VALUE;
+			break;
+		case SCHEDULING_ROUND_ROBIN:
+			Kernel.schedulingQuantum = Kernel.previousQuantum;
+			break;
+		case SCHEDULING_PRIORITY:
+			// Nothing to do concerning quantum.
+			break;
+		default:
+			throw "Kernel - Invalid scheduling mode.";
+	}
+}
 
 // ---------- Interrupt Servicing ----------
 
@@ -149,14 +181,14 @@ Kernel.contextSwitchIsr = function()
 		return;
 	}
 	
-	var nextProcess = Kernel.readyQueue.dequeue();
+	var nextProcess = Kernel.readyQueue.remove();
 	
 	Kernel.trace("Context switch: Process " + Kernel.runningProcess.pid + " -> " + nextProcess.pid);
 	
 	// Move current process to ready queue.
 	Kernel.runningProcess.status = "Ready";
 	Kernel.runningProcess.setRegisters(_CPU);
-	Kernel.readyQueue.enqueue(Kernel.runningProcess);
+	Kernel.readyQueue.insert(Kernel.runningProcess.schedulingPriority(), Kernel.runningProcess);
 	
 	// Dequeue next process and start execution.
 	Kernel.runningProcess = nextProcess;

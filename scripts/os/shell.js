@@ -561,23 +561,35 @@ function shellSetCpuScheduling(args)
 {
 	if (args.length > 0)
 	{
-		switch (args[0])
+		// Save previous mode in case of error.
+		var schedMode = _SchedulingMode;
+		
+		try
 		{
-			case "rr":
-				_SchedulingMode = SCHEDULING_ROUND_ROBIN;
-				_StdIn.putText("Scheduling mode set to round robin.");
-				break;
-			case "fcfs":
-				_SchedulingMode = SCHEDULING_FCFS;
-				_StdIn.putText("Scheduling mode set to FCFS.");
-				break;
-			case "priority":
-				_SchedulingMode = SCHEDULING_PRIORITY;
-				_StdIn.putText("Scheduling mode set to priority.");
-				break;
-			default:
-				_StdIn.putText("Invalid scheduling mode.");
-				break;
+			switch (args[0])
+			{
+				case "rr":
+					_SchedulingMode = SCHEDULING_ROUND_ROBIN;
+					break;
+				case "fcfs":
+					_SchedulingMode = SCHEDULING_FCFS;
+					break;
+				case "priority":
+					_SchedulingMode = SCHEDULING_PRIORITY;
+					break;
+				default:
+					_StdIn.putText("Invalid scheduling mode.");
+					return;
+			}
+			
+			Kernel.applySchedulingMode();
+			_StdIn.putText("Scheduling mode set.");
+		}
+		catch (e)
+		{
+			// Revert to previous mode and print error.
+			_SchedulingMode = schedMode;
+			_StdIn.printText(e);
 		}
 	}
 	else 

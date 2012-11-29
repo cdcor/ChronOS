@@ -48,6 +48,7 @@ var SCHEDULING_FCFS = 1;
 var SCHEDULING_PRIORITY = 2;
 
 var DEFAULT_SCHEDULING_QUATUM = 6;
+var DEFAULT_PRIORITY = Number.MAX_VALUE;
 
 
 // ---------- Global Variables ----------
