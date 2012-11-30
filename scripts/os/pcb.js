@@ -14,7 +14,8 @@ function Pcb()
     this.zFlag = 0;  // Z-ero flag (Think of it as "isZero")
     
     this.priority = DEFAULT_PRIORITY;
-    this.arrivalTime = _OSclock;
+    this.arrivalTime = _OsClock;
+    this.lastAccessTime = _OsClock;
     
     this.status = "New";
     
@@ -39,12 +40,27 @@ Pcb.prototype.setRegisters = function(cpu)
 	this.zFlag = cpu.zFlag.data;
 };
 
+/**
+ * Returns the scheduling priority depending on the current scheduling mode.
+ * 
+ * @return {Number} the scheduling priority
+ */
 Pcb.prototype.schedulingPriority = function()
 {
 	if (_SchedulingMode === SCHEDULING_FCFS)
 		return this.arrivalTime;
 	return this.priority;
 }
+
+/**
+ * Returns the swap file name for this PCB.
+ * 
+ * @return {String} the swap file name.
+ */
+Pcb.prototype.swapFileName = function()
+{
+	return "swap@pid" + this.pid + ".sys";
+}; 
 
 /**
  * Returns a string representation of this PCB. 

@@ -55,7 +55,7 @@ var DEFAULT_PRIORITY = Number.MAX_VALUE;
 
 var _CPU = null;
 
-var _OSclock = 0; // Page 23.
+var _OsClock = 0; // Page 23.
 
 var _Mode = KERNEL_MODE; // Page 21.
 

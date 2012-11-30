@@ -79,7 +79,7 @@ Control.log = function(message, source)
         source = "?";
 
     // Note the OS CLOCK.
-    var clock = _OSclock;
+    var clock = _OsClock;
 
     // Update the log console.
     Log.add(message, source, clock);
@@ -168,7 +168,7 @@ Control.hostReset = function(button)
         /*
         clearInterval(Control.hardwareClockId);
         
-        _OSclock = 0;
+        _OsClock = 0;
         
         _Console.toggleCursor(false);
         
@@ -257,7 +257,7 @@ Control.toggleSingleStep = function()
 Control.clockPulse = function(button)
 {
     // Increment the hardware (host) clock.
-   	_OSclock++;
+   	_OsClock++;
    	// Call the kernel clock pulse event handler.
    	Kernel.onCpuClockPulse(button);
    	
@@ -284,7 +284,7 @@ Control.onKeypress = function(event)
         // Note the pressed key code in the params (Mozilla-specific).
         var params = new Array(event.which, event.shiftKey, event.ctrlKey);
         // Enqueue this interrupt on the kernal interrupt queue so that it gets to the Interrupt handler.
-        Kernel.interruptQueue.enqueue(new Interrupt(KEYBOARD_IRQ, params));
+        Kernel.interrupt(KEYBOARD_IRQ, params);
     }
 };
 

@@ -10,7 +10,7 @@ function MemoryManager()
 {
     this.memory = new Memory(MEMORY_SIZE);
     this.numberOfBlocks = MEMORY_SIZE / MEMORY_BLOCK_SIZE;
-    this.blockPids = new Array();
+    this.blockPcbs = [];
     
     this.relocationRegister = 0;
 }
@@ -22,35 +22,35 @@ function MemoryManager()
  * @param {Pcb} pcb the process to allocate
  */
 MemoryManager.prototype.allocate = function(pcb)
-{
-	Kernel.trace("Allocating memory.");
-	
+{	
     // Find the next available block
-    var block = null;
+    var block;
     
     for (var i = 0; i < this.numberOfBlocks; i++)
     {
-        if (this.blockPids[i] == null) // The block is available
+        if (this.blockPcbs[i] == null) // The block is available
         {
             // Use this block
             block = i;
             // Assign the process ID to this block
-            this.blockPids[i] = pcb.pid;
+            this.blockPcbs[i] = pcb;
             break;
         }
     }
     
-    if (block == null) // No more free blocks
+    if (block != null) // No more free blocks
     {
-        return false;
-        // TODO Implement swapping.
-    }
-    else
-    {
-        // Set the base and limit according to the block.
+    	// Set the base and limit according to the block.
         pcb.base = block * MEMORY_BLOCK_SIZE;
         pcb.limit = MEMORY_BLOCK_SIZE;
         return true;
+       
+    }
+    else
+    {
+    	// Roll out a process and try to allocate again
+    	this.rollOut(this.getMostRecentlyAccessedProcess());
+    	return this.allocate(pcb);
     }
 };
 
@@ -64,30 +64,110 @@ MemoryManager.prototype.deallocate = function(pcb)
 	Kernel.trace("Deallocating memory.");
 	
     // Find the block containing the process
-    var block = null;
+    var processContents = "", i, j;
     
-    for (var i = 0; i < this.blockPids.length && i < this.numberOfBlocks; i++)
+    for (i = 0; i < this.blockPcbs.length && i < this.numberOfBlocks; i++)
     {
-        if (this.blockPids[i] === pcb.pid)
+        if (this.blockPcbs[i] === pcb)
         {
-            block = i;
-            this.blockPids[i] = undefined;
+            this.blockPcbs[i] = null;
             
             // Zero-out the block.
             var savedRelocationReg = this.relocationRegister;
             
-            this.setRelocationRegister(pcb);
+            this.relocationRegister = pcb.base;
             
-            for (var i = 0; i < pcb.limit; i++)
-            	this.write(i, 0);
-            	
-            Kernel.trace("Resetting relocation register to " + savedRelocationReg + ".");
+            for (j = 0; j < pcb.limit; j++)
+            {
+            	processContents += this.read(j).toString(16).prepad(2, "0");
+            	this.write(j, 0);
+            }
+           	
+           	pcb.base = null;
+           	pcb.limit = null;
+           	
             this.relocationRegister = savedRelocationReg;
         }
     }
     
-    if (block == null)
-        Kernel.trace("Memory deallocation failed: Process not found.");
+    if (processContents == "")
+    {
+    	Kernel.trace("Memory deallocation failed: Process not found.");
+    	return null;
+    }
+    
+    return processContents;
+};
+
+MemoryManager.prototype.loadProcess = function(pcb, code)
+{
+    this.allocate(pcb);
+    
+	// Set relocation register.
+    this.relocationRegister = pcb.base;
+    
+    Kernel.trace("Loading process into memory. Base address: " + pcb.base);
+    
+    // Load into memory.
+    code = code.replace(/\s+/g, "");
+    var codePieces = [];
+    
+    for (var i = 0; i < code.length; i += 2)
+    	codePieces.push(code.substr(i, 2));
+    	
+    for (var address = 0; address < codePieces.length && address < MEMORY_BLOCK_SIZE; address++)
+    	Kernel.memoryManager.write(address, codePieces[address]);
+};
+
+MemoryManager.prototype.rollIn = function(pcb)
+{
+	// TODO If possible, figure out a way to cleanly do this with an HDD interrupt.
+	Kernel.trace("Rolling in process (PID " + pcb.pid + ").");
+	
+	try
+	{
+		var processContents = Kernel.hddDriver.readFile(pcb.swapFileName());
+		Kernel.interrupt(HDD_IRQ, ["swap-delete", pcb.swapFileName()]);
+		
+		this.loadProcess(pcb, processContents);
+	}
+	catch (e)
+	{
+		Kernel.trace("Roll in failed: " + e);
+	}
+};
+
+MemoryManager.prototype.rollOut = function(pcb)
+{
+	Kernel.trace("Rolling out process (PID " + pcb.pid + ").");
+	
+	var processContents = this.deallocate(pcb);
+	
+    if (processContents)
+    {
+    	var swapFile = pcb.swapFileName();
+    	
+    	Kernel.interrupt(HDD_IRQ, ["swap-write", swapFile, processContents]);    	
+    }
+    else
+    	Kernel.trace("Roll out failed: Process not found.");
+};
+
+MemoryManager.prototype.getMostRecentlyAccessedProcess = function()
+{
+	var priority = -1;
+	var pcb = null;
+	
+	for (var i = 0; i < this.blockPcbs.length; i++)
+    {
+    	if (this.blockPcbs[i].lastAccessTime > priority)
+    	{
+    		pcb = this.blockPcbs[i];
+    		priority = pcb.lastAccessTime;
+    	}
+    }
+    
+    return pcb;
 };
 
 /**
@@ -97,6 +177,9 @@ MemoryManager.prototype.deallocate = function(pcb)
  */
 MemoryManager.prototype.setRelocationRegister = function(pcb)
 {
+	if (pcb.base == null) // Swapped out
+		this.rollIn(pcb);
+	
 	Kernel.trace("Setting relocation register to " + pcb.base + " (PID " + pcb.pid + ").");
     this.relocationRegister = pcb.base;
 };
@@ -108,7 +191,7 @@ MemoryManager.prototype.setRelocationRegister = function(pcb)
  */
 MemoryManager.prototype.read = function(address)
 {
-    // Ensure valid address. Trap error if not.
+    // Ensure valid address.
     if (address < 0 || address >= MEMORY_BLOCK_SIZE)
         throw "Memory access out of bounds.";
     else if (this.relocationRegister != null) // Process has been allocated
@@ -130,7 +213,7 @@ MemoryManager.prototype.write = function(address, data)
     // Ensure valid address and data.
     if (address < 0 || address >= MEMORY_BLOCK_SIZE)
     {
-    	if (arguments.callee.caller == Kernel.loadMemory)
+    	if (arguments.callee.caller == Kernel.loadProgram)
     		throw "Not enough memory.";
     	else
         	throw "Memory access out of bounds.";

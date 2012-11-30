@@ -119,7 +119,7 @@ Shell.prototype.init = function()
     // load
     sc = new ShellCommand();
     sc.command = "load";
-    sc.description = "- Loads the machine code into memory.";
+    sc.description = "[<priority>] - Loads code into memory.";
     sc.funct = shellLoad;
     this.commandList.push(sc);
     
@@ -543,17 +543,25 @@ function shellTrap()
     StatusBar.setStatus("BSoD");
 }
 
-function shellLoad()
+function shellLoad(args)
 {
 	var input = ProgramInput.get();
+	var priority = args[0] ? parseInt(args[0]) : null;
 	
 	if (input == "")
 		_StdIn.putText("No program to load.");
 	else
 	{
-		_StdIn.putText("Loading program...");
-		_StdIn.advanceLine();
-		Kernel.loadMemory(input);
+		if (priority && isNaN(priority))
+		{
+			_StdIn.putText("Invalid priority.");
+		}
+		else
+		{
+			_StdIn.putText("Loading program...");
+			_StdIn.advanceLine();
+			Kernel.loadProgram(input, priority);
+		}
 	}
 }
 
@@ -669,7 +677,7 @@ function shellKillProcess(args)
 
 function shellFormatHardDrive()
 {
-	Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, ["format"]));
+	Kernel.interrupt(HDD_IRQ, ["format"]);
 }
 
 function shellCreateFile(args)
@@ -677,7 +685,7 @@ function shellCreateFile(args)
 	if (args.length > 0)
 	{
 		args.unshift("create");
-		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+		Kernel.interrupt(HDD_IRQ, args);
 	}
 	else
 		_StdIn.putText("Usage: create <file>  Please supply a file name.");
@@ -688,7 +696,7 @@ function shellReadFile(args)
 	if (args.length > 0)
 	{
 		args.unshift("read");
-		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+		Kernel.interrupt(HDD_IRQ, args);
 	}
 	else
 		_StdIn.putText("Usage: read <file>  Please supply a file name.");
@@ -699,7 +707,7 @@ function shellWriteFile(args)
 	if (args.length > 1)
 	{
 		args.unshift("write");
-		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+		Kernel.interrupt(HDD_IRQ, args);
 	}
 	else
 		_StdIn.putText("Usage: write <file> <data>  Please supply a file and data.");
@@ -710,7 +718,7 @@ function shellDeleteFile(args)
 	if (args.length > 0)
 	{
 		args.unshift("delete");
-		Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, args));
+		Kernel.interrupt(HDD_IRQ, args);
 	}
 	else
 		_StdIn.putText("Usage: delete <file>  Please supply a file name.");
@@ -718,5 +726,5 @@ function shellDeleteFile(args)
 
 function shellListFiles()
 {
-	Kernel.interruptQueue.enqueue(new Interrupt(HDD_IRQ, ["list"]));
+	Kernel.interrupt(HDD_IRQ, ["list"]);
 }

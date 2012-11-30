@@ -85,7 +85,7 @@ Kernel.killProcess = function(pid)
 		Kernel.trace("Killing process: " + process.pid);
 		
 		if (process.status === "Running")
-			Kernel.interruptQueue.enqueue(new Interrupt(PROCESS_TERMINATED_IRQ, "User terminated process."));
+			Kernel.interrupt(PROCESS_TERMINATED_IRQ, "User terminated process.");
 		else // Ready
 			Kernel.readyQueue.remove(i - 1);
 	}
@@ -109,7 +109,7 @@ Kernel.scheduleCycle = function(step)
         	
         	if ((Kernel.processCycles >= Kernel.schedulingQuantum) && (Kernel.readyQueue.size() > 0))
         	{
-        		Kernel.interruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH_IRQ));
+        		Kernel.interrupt(CONTEXT_SWITCH_IRQ);
         	}
         }
 	}
@@ -152,14 +152,13 @@ Kernel.applySchedulingMode = function()
 	switch (_SchedulingMode)
 	{
 		case SCHEDULING_FCFS:
+			// Fall-through
+		case SCHEDULING_PRIORITY:
 			Kernel.previousQuantum = Kernel.schedulingQuantum;
 			Kernel.schedulingQuantum = Number.MAX_VALUE;
 			break;
 		case SCHEDULING_ROUND_ROBIN:
 			Kernel.schedulingQuantum = Kernel.previousQuantum;
-			break;
-		case SCHEDULING_PRIORITY:
-			// Nothing to do concerning quantum.
 			break;
 		default:
 			throw "Kernel - Invalid scheduling mode.";
@@ -187,6 +186,7 @@ Kernel.contextSwitchIsr = function()
 	
 	// Move current process to ready queue.
 	Kernel.runningProcess.status = "Ready";
+	Kernel.runningProcess.lastAccessTime = _OsClock;
 	Kernel.runningProcess.setRegisters(_CPU);
 	Kernel.readyQueue.insert(Kernel.runningProcess.schedulingPriority(), Kernel.runningProcess);
 	

@@ -142,9 +142,6 @@ File.prototype.toFileString = function()
 	
 	var data = File.convertData(this.data);
 	
-	if (data.length > 1)
-		console.log("WARN: File data spans more than one block. Data will be truncated.");
-
 	return str + data[0];
 };
 
@@ -163,15 +160,16 @@ File.prototype.deleteFromDrive = function(hardDrive)
  * Converts the specified data string to a form appropriate for storage on the hard drive.
  * 
  * @param {String} data the data to convert
+ * @param {Boolean} isBinaryData true if the data to be converted is binary data.
  * 
  * @return {Array} an array of data strings to be stored on the hard drive. The array will only be
  *     of size 1 if the data does not exceed the block size.
  */
-File.convertData = function(data)
+File.convertData = function(data, isBinaryData)
 {
 	data += "\0"; // Null terminate
 	
-    var maxLength = File.DATA_SIZE * 2; // 2 Hex chars per byte
+    var maxLength = isBinaryData ? File.DATA_SIZE * 4 : File.DATA_SIZE * 2; // 2 Hex chars per byte
     var convertedData = "", convertedArray = [], dataPiece;
     
     for (var i = 0; i < data.length; i++)
@@ -211,7 +209,7 @@ File.revertData = function(data)
 
 File.filesFromData = function(data, isBinaryData)
 {
-	var dataParts = File.convertData(data);
+	var dataParts = File.convertData(data, isBinaryData);
 	var files = [];
 	
 	for (var i = 0; i < dataParts.length; i++)

@@ -15,6 +15,8 @@ DeviceDriverHDD.DIRECTORY_SECTOR = 0;
 function DeviceDriverHDD()
 {
 	this.hardDrive = null;
+	
+	this.buffer = "";
 }
 
 /**
@@ -40,6 +42,7 @@ DeviceDriverHDD.prototype.isr = function(params)
 	{
 		switch (command)
 		{
+			// Shell commands
 			case "create":
 				this.createFile(filename);
 				_StdIn.putMessage("File created.");
@@ -62,13 +65,29 @@ DeviceDriverHDD.prototype.isr = function(params)
 				this.format();
 				_StdIn.putMessage("Format successful.");
 				break;
+			
+			// Swap commands
+			case "swap-write":
+				this.createFile(filename, true);
+				this.writeFile(filename, data, true);
+				break;
+			case "swap-read":
+				this.buffer = this.read(filename);
+				break;
+			case "swap-delete":
+				this.deleteFile(filename);
+				break;
+			
 			default:
 				Kernel.trapError("Invalid HDD Driver command.");
 		}
 	}
 	catch (e)
 	{
-		_StdIn.putMessage(e);
+		if (!(/swap/).test(command))
+			_StdIn.putMessage(e);
+		else
+			Kernel.trace("Swap file error: " + e);
 	}
 	
 	// Update the display for convenience
@@ -80,9 +99,10 @@ DeviceDriverHDD.prototype.isr = function(params)
 /**
  * Creates the specified file.
  * 
- * @param filename the file
+ * @param {String} filename the file
+ * @param {Boolean} forSwap true if this operation is for swapping
  */
-DeviceDriverHDD.prototype.createFile = function(filename)
+DeviceDriverHDD.prototype.createFile = function(filename, forSwap)
 {
 	Kernel.trace("Creating file: " + filename);
 	
@@ -99,7 +119,8 @@ DeviceDriverHDD.prototype.createFile = function(filename)
 		return;
 	}
 	
-	throw "Error: File already exists.";
+	if (!forSwap)
+		throw "Error: File already exists.";
 };
 
 /**

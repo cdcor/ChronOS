@@ -123,7 +123,7 @@ Cpu.prototype.execute = function()
  */
 Cpu.prototype.fault = function(message)
 {
-	Kernel.interruptQueue.enqueue(new Interrupt(PROCESS_FAULT_IRQ, message));
+	Kernel.interrupt(PROCESS_FAULT_IRQ, message);
 };
 
 // ---------- Operations ----------
@@ -176,7 +176,7 @@ Cpu.prototype.noOperation = function() // EA
 
 Cpu.prototype.breakOp = function() // 00
 {
-	Kernel.interruptQueue.enqueue(new Interrupt(PROCESS_TERMINATED_IRQ));
+	Kernel.interrupt(PROCESS_TERMINATED_IRQ);
 };
 
 Cpu.prototype.compareXReg = function() // EC
@@ -206,11 +206,11 @@ Cpu.prototype.systemCall = function() // FF
 {
 	if (this.xReg.read() === 1)
 	{
-		Kernel.interruptQueue.enqueue(new Interrupt(SYSTEM_CALL_IRQ, 1));
+		Kernel.interrupt(SYSTEM_CALL_IRQ, 1);
 	}
 	else if (this.xReg.read() === 2)
 	{
-		Kernel.interruptQueue.enqueue(new Interrupt(SYSTEM_CALL_IRQ, 2));
+		Kernel.interrupt(SYSTEM_CALL_IRQ, 2);
 	}
 };
 

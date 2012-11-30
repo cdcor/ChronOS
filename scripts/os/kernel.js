@@ -127,57 +127,32 @@ Kernel.onCpuClockPulse = function(step)
  * 
  * @param {String} code the code to load
  */
-Kernel.loadMemory = function(code)
+Kernel.loadProgram = function(code, priority)
 {
     Kernel.trace("Loading program.");
     
     // Create new PCB for the program.
     var pcb = new Pcb();
     
-     // Allcate memory.
-    var isAllocated = Kernel.memoryManager.allocate(pcb);
+    if (priority)
+    	pcb.priority = priority;
     
-    if (isAllocated)
+    try
     {
-    	// Set relocation register.
-	    Kernel.memoryManager.setRelocationRegister(pcb);
-	    
-	    Kernel.trace("Loading code into memory. Base address: " + pcb.base);
-	    
-	    // Load into memory.
-	    codePieces = code.split(" ");
-	    
-	    for (var address = 0; address < codePieces.length; address++)
-	    {
-	    	try
-	    	{
-	    		Kernel.memoryManager.write(address, codePieces[address]);
-	    	}
-	    	catch(error)
-	    	{
-	    		Kernel.trace("Load failed: " + error);
-	    		_StdIn.putText("Load failed: " + error);
-	    		
-	    		Kernel.memoryManager.deallocate(pcb);
-	    		
-	    		return;
-	    	}
-	    }
-	    
-	    // Send the PID to the console.
+    	Kernel.memoryManager.loadProcess(pcb, code);
+    	
+    	// Send the PID to the console.
 		_StdIn.putText("PID: " + pcb.pid);
 		
 		// Place on resident list
 		Kernel.residentList[pcb.pid] = pcb;
 		pcb.status = "Resident";
-		
-		if (!Control.memoryDisplayOn)
-			Control.toggleMemoryHddDisplay();
-	}
-	else
-	{
-		_StdIn.putText("Not enough memory for process.");
-	}
+    }
+    catch (e)
+    {
+    	Kernel.trace("Load failed: " + e);
+    	_StdIn.putText("Load failed: " + e);
+    }
 };
 
 // ---------- Interrupt servicing ----------
@@ -201,6 +176,11 @@ Kernel.disableInterrupts = function()
     Control.disableKeyboardInterrupt();
     // More...?
 };
+
+Kernel.interrupt = function(irq, params)
+{
+	Kernel.interruptQueue.enqueue(new Interrupt(irq, params));
+}
 
 /**
  * The Interrupt Handler Routine which handles any interrupts placed on the interrupt queue.
@@ -290,7 +270,7 @@ Kernel.trace = function(message)
         if (message === "Idle")
         {
             // Don't log every idle clock pulse.
-            if (_OSclock % 10 === 0)  // Dependent on CPU_CLOCK_INTERVAL
+            if (_OsClock % 10 === 0)  // Dependent on CPU_CLOCK_INTERVAL
                 Control.log(message, "OS");
         }
         else

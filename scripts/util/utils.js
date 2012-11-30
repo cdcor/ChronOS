@@ -63,7 +63,7 @@ String.prototype.prepad = function(length, character)
 	
 	var str = this; // This performs a deep copy.
     
-    while(str.length < length)
+    while (str.length < length)
         str = character + str;
     
     return str;
