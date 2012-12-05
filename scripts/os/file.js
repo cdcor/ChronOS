@@ -22,8 +22,8 @@
    ---------- */
 
 File.STATUS_AVAILABLE = 0;
-File.STATUS_OCCUPIED_TEXT = 1;
-File.STATUS_OCCUPIED_BIN = 2;
+File.STATUS_OCCUPIED_TEXT = 1; // Text data
+File.STATUS_OCCUPIED_BIN = 2; // Swap data
 
 // The maximum size of the data per block in bytes. For now, 4 is a magic number, relying on the 
 //   number of tracks, sectors, and blocks per to be 4, 8, and 8, respectively.
@@ -55,6 +55,11 @@ function File(data, isBinaryData)
 		this.setData(data, isBinaryData);
 }
 
+/**
+ * Sets this file's data with the string read directly from the hard drive.
+ * 
+ * @param {String} fileStr the string representing this file
+ */
 File.prototype.setWithFileString = function(fileStr)
 {
 	// File string is of the form: Status T  S  B  Data
@@ -71,6 +76,13 @@ File.prototype.setWithFileString = function(fileStr)
 	this.data = File.revertData(fileStr.substr(8));
 };
 
+/**
+ * Sets the TSB of this file.
+ * 
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
+ */
 File.prototype.setTSB = function(track, sector, block)
 {
 	this.track = track;
@@ -78,6 +90,13 @@ File.prototype.setTSB = function(track, sector, block)
 	this.block = block;
 };
 
+/**
+ * Sets the TSB this file links to.
+ * 
+ * @param {Number} track the track
+ * @param {Number} sector the sector
+ * @param {Number} block the block
+ */
 File.prototype.setLinkedTSB = function(track, sector, block)
 {
 	this.linkedTrack = track;
@@ -85,6 +104,12 @@ File.prototype.setLinkedTSB = function(track, sector, block)
 	this.linkedBlock = block;
 };
 
+/**
+ * Sets the data this file containes.
+ * 
+ * @param {String} data the data to set
+ * @param {Boolean} isBinaryData true if the data to be stored is swap data
+ */
 File.prototype.setData = function(data, isBinaryData)
 {
 	if (isBinaryData) // Hex
@@ -102,6 +127,11 @@ File.prototype.setData = function(data, isBinaryData)
 	}
 };
 
+/**
+ * Retrives the data of this file.
+ * 
+ * @return {String} the data
+ */
 File.prototype.getData = function()
 {
 	if (this.status === File.STATUS_OCCUPIED_TEXT)
@@ -118,16 +148,32 @@ File.prototype.getData = function()
 	return null;
 }
 
+/**
+ * Returns true if this file is available.
+ * 
+ * @return {Boolean} true if this file is available
+ */
 File.prototype.isAvailable = function()
 {
 	return this.status === File.STATUS_AVAILABLE;
 };
 
+/**
+ * Returns true if this file links to another (i.e. the linkedTSB is not 0, 0, 0)
+ * 
+ * @return {Boolean} true if this file links to another 
+ */
 File.prototype.isLinked = function()
 {
 	return !(this.linkedTrack === 0 && this.linkedSector === 0 && this.linkedBlock === 0);
 }
 
+/**
+ * Returns this file represented as a string to be stored on the hard drive. Note that the actual
+ * TSB is not stored in the string, as that will be the key/index to this file.
+ * 
+ * @return {String} this file represented as a string to be stored on the hard drive
+ */
 File.prototype.toFileString = function()
 {
 	// File string is of the form: Status T  S  B  Data
@@ -145,11 +191,21 @@ File.prototype.toFileString = function()
 	return str + data[0];
 };
 
+/**
+ * Writes this file to the specified hard drive.
+ * 
+ * @param {HardDrive} hardDrive the hard drive
+ */
 File.prototype.writeToDrive = function(hardDrive)
 {		
 	hardDrive.write(this.track, this.sector, this.block, this.toFileString());
 }
 
+/**
+ * Deletes this file from the specified hard drive.
+ * 
+ * @param {HardDrive} hardDrive the hard drive
+ */
 File.prototype.deleteFromDrive = function(hardDrive)
 {
 	this.status = File.STATUS_AVAILABLE;
@@ -157,10 +213,10 @@ File.prototype.deleteFromDrive = function(hardDrive)
 };
 
 /**
- * Converts the specified data string to a form appropriate for storage on the hard drive.
+ * Converts the specified data string to a form appropriate for storage on the hard drive (hex).
  * 
  * @param {String} data the data to convert
- * @param {Boolean} isBinaryData true if the data to be converted is binary data.
+ * @param {Boolean} isBinaryData true if the data to be converted is swap data.
  * 
  * @return {Array} an array of data strings to be stored on the hard drive. The array will only be
  *     of size 1 if the data does not exceed the block size.
@@ -195,7 +251,9 @@ File.convertData = function(data, isBinaryData)
 /**
  * Reverts the hard drive data string for a file to a string representation.
  * 
- * @param {String} data
+ * @param {String} data the data
+ * 
+ * @return {String} data the reverted data
  */
 File.revertData = function(data)
 {
@@ -207,6 +265,14 @@ File.revertData = function(data)
 	return revertedData;
 };
 
+/**
+ * Returns an array of chained files representing the specified data.
+ * 
+ * @param {String} data the data
+ * @param {Boolean} isBinaryData true if the data is swap data
+ * 
+ * @return {Array} the chained files representing the data.
+ */
 File.filesFromData = function(data, isBinaryData)
 {
 	var dataParts = File.convertData(data, isBinaryData);
@@ -218,6 +284,13 @@ File.filesFromData = function(data, isBinaryData)
 	return files;
 };
 
+/**
+ * Returns a file given the hard drive's string representation.
+ * 
+ * @param {Object} fileStr the file string
+ * 
+ * @return {File} the file
+ */
 File.fileFromStr = function(fileStr)
 {
 	var file = new File();

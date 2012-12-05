@@ -17,9 +17,12 @@ function MemoryManager()
 
 /**
  * Sets the base and limit registers for the given process based on availability. Also sets the 
- * block as allocated according to the PID. Returns true if the procces was successfully allocated.
+ * block as allocated according to the PID. Swaps out a process if memory is full. Returns true 
+ * if the procces was successfully allocated.
  * 
  * @param {Pcb} pcb the process to allocate
+ * 
+ * @return {Boolean} true if the process was allocated
  */
 MemoryManager.prototype.allocate = function(pcb)
 {	
@@ -99,6 +102,12 @@ MemoryManager.prototype.deallocate = function(pcb)
     return processContents;
 };
 
+/**
+ * Loads the specified process and code into memory.
+ * 
+ * @param {Pcb} pcb the PCB
+ * @param {String} code a hex string of the code
+ */
 MemoryManager.prototype.loadProcess = function(pcb, code)
 {
     this.allocate(pcb);
@@ -119,9 +128,17 @@ MemoryManager.prototype.loadProcess = function(pcb, code)
     	Kernel.memoryManager.write(address, codePieces[address]);
 };
 
+/**
+ * Rolls in the specified process from virutal memory.
+ * 
+ * @param {Pcb} pcb the process to roll in
+ */
 MemoryManager.prototype.rollIn = function(pcb)
 {
-	// TODO If possible, figure out a way to cleanly do this with an HDD interrupt.
+	// TODO If possible, figure out a way to cleanly do this with an HDD interrupt. It will require
+	//   storing the read contents in the HDD buffer, but the CPU must wait for the next cycle for
+	//   the memory manager to pick up the contents. I think this can be done with a second kind
+	//   of interrupt.
 	Kernel.trace("Rolling in process (PID " + pcb.pid + ").");
 	
 	try
@@ -137,6 +154,11 @@ MemoryManager.prototype.rollIn = function(pcb)
 	}
 };
 
+/**
+ * Rolls out the specified process to virutal memory.
+ * 
+ * @param {Pcb} pcb the process to roll out
+ */
 MemoryManager.prototype.rollOut = function(pcb)
 {
 	Kernel.trace("Rolling out process (PID " + pcb.pid + ").");
@@ -153,6 +175,9 @@ MemoryManager.prototype.rollOut = function(pcb)
     	Kernel.trace("Roll out failed: Process not found.");
 };
 
+/**
+ * This is the most efficient process to roll out in RR scheduling.
+ */
 MemoryManager.prototype.getMostRecentlyAccessedProcess = function()
 {
 	var priority = -1;
