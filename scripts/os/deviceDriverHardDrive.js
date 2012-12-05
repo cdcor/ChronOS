@@ -216,6 +216,9 @@ DeviceDriverHDD.prototype.deleteFile = function(filename)
 {
 	Kernel.trace("Deleting file: " + filename);
 	
+	if (filename === "MBR")
+		throw "Cannot delete MBR.";
+	
 	this.deleteFileChain(this.findFile(filename), true);
 };
 

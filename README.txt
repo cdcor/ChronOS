@@ -10,7 +10,7 @@ file.js. It also explains how I separated text data from swap data.
 I implemented a hard drive display which can be accessed by clicking the 
 header to the memory display. Hovering over a TSB will show the data stored
 there as text data rather than hex and it will also highlight the chained
-TSB as blue. Although there is a manual refresh button, the hard drive 
+TSB in blue. Although there is a manual refresh button, the hard drive 
 display will update everytime it is accessed.
 
 You can theorically run as many programs as can fit in the hard drive with
@@ -23,7 +23,8 @@ overfilling the hard drive with most likely break things...
 Concerning you're comments on my last project, you can absolutely use it next
 time you teach the class. I also plan to use this project to show people when
 they ask to see things I've done, so I hope to have all the OCD issues fixed
-eventually (as well as more thorough documentation).
+eventually (as well as more thorough documentation). Need to find some
+motivation once I have the time though.
 
 About the OCD...
 
@@ -33,10 +34,7 @@ can't scroll when it's on, hence the checkbox to disable it. I will add a
 scroll event to the display to automatically disable it when you scroll though.
 I will also only have it scroll when something has changed.
 
-Dropping to the next line when a process ends would mean for every process. 
-Thus, if you run 3 processes at once, for example, the 12DONE, the console will 
-drop 3 times, a line after every "DONE". The other way around this is to drop 
-a line when the CPU becomes idle. I'm not sure which is better.
+I still need to drop to the next line when the CPU becomes idle.
 
 You can still enter commands while programs are running. Commands do not
 internally co-mingle with the output, only on the screen. You just have
