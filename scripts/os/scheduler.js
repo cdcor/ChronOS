@@ -263,6 +263,13 @@ Kernel.getActiveProcesses = function()
 	
 	var readyProcesses = Kernel.readyQueue.getContents();
 	
+	if (_SchedulingMode !== SCHEDULING_ROUND_ROBIN)
+	{
+		readyProcesses.sort(function(pcb1, pcb2) {
+			return pcb1.schedulingPriority() - pcb2.schedulingPriority();
+		});
+	}
+	
 	for (var i = 0; i < readyProcesses.length; i++)
 		processes.push(readyProcesses[i]);
 		

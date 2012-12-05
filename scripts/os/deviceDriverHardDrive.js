@@ -91,8 +91,8 @@ DeviceDriverHDD.prototype.isr = function(params)
 	}
 	
 	// Update the display for convenience
-	if (Control.memoryDisplayOn)
-		Control.toggleMemoryHddDisplay();
+	//if (Control.memoryDisplayOn)
+	//	Control.toggleMemoryHddDisplay();
 	HardDriveDisplay.update();
 };
 

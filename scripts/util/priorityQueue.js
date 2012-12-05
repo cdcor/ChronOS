@@ -170,7 +170,7 @@ PriorityMinQueue.prototype.getContents = function()
 		value = this.h[i]["v"]
 		
 		for (j in value)
-			contents.push(value[i]);
+			contents.push(value[j]);
 	}
 	
 	return contents;

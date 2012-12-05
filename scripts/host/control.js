@@ -21,7 +21,7 @@ $(document).ready(function()
     Control.init();
     
     // Temp - autostart for debugging
-   	Control.hostStart($("#btnStartOS")[0]);
+   	//Control.hostStart($("#btnStartOS")[0]);
 });
 
 function Control() {}
