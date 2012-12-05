@@ -7,6 +7,12 @@ of course (I think).
 A detailed explanation on my approach to implementing the file system is in
 file.js. It also explains how I separated text data from swap data.
 
+I implemented a hard drive display which can be accessed by clicking the 
+header to the memory display. Hovering over a TSB will show the data stored
+there as text data rather than hex and it will also highlight the chained
+TSB as blue. Although there is a manual refresh button, the hard drive 
+display will update everytime it is accessed.
+
 You can theorically run as many programs as can fit in the hard drive with
 the way I implemented swapping. I have not overfilled the hard drive since
 the project technically only requires 4 processes to be loaded, so

@@ -29,7 +29,7 @@ Kernel.runProcess = function(pid)
 	{
 		Kernel.trace("Running process: " + pid);
 		// Place on the ready queue.
-		Kernel.readyQueue.insert(process.schedulingPriority(), process);
+		Kernel.readyQueue.enqueue(process);
 		process.status = "Ready";
 		// Remove from resident list.
 		Kernel.residentList[pid] = null;
@@ -53,7 +53,7 @@ Kernel.runAllProcesses = function()
 		{
 			Kernel.trace("Running process: " + process.pid);
 			// Place on the ready queue.
-			Kernel.readyQueue.insert(process.schedulingPriority(), process);
+			Kernel.readyQueue.enqueue(process);
 			process.status = "Ready";
 			// Remove from resident list.
 			Kernel.residentList[i] = null;
@@ -124,7 +124,7 @@ Kernel.scheduleCycle = function(step)
  */
 Kernel.dispatchNextProcess = function()
 {
-	var nextProcess = Kernel.readyQueue.remove();
+	var nextProcess = Kernel.getNextProcess();
 	
 	Kernel.runningProcess = nextProcess;
 	nextProcess.status = "Running";
@@ -135,6 +135,40 @@ Kernel.dispatchNextProcess = function()
 	
 	_Mode = USER_MODE;
 };
+
+/**
+ * A bit of a hack to simulate a priority queue for priority scheduling.
+ * TODO get the real priority queue working. The only thing it breaks is the kill command.
+ */
+Kernel.getNextProcess = function()
+{
+	var nextProcess;
+	
+	if (_SchedulingMode === SCHEDULING_ROUND_ROBIN)
+	{
+		nextProcess = Kernel.readyQueue.dequeue();
+	}
+	else
+	{
+		var processes = Kernel.readyQueue.getContents();
+		
+		nextProcess = processes[0];
+		var processIndex = 0;
+		
+		for (var i = 1; i < processes.length; i++)
+		{
+			if (processes[i].schedulingPriority() < nextProcess.schedulingPriority())
+			{
+				processIndex = i;
+				nextProcess = processes[i];
+			}
+		}
+		
+		Kernel.readyQueue.remove(processIndex)
+	}
+	
+	return nextProcess;
+}
 
 /**
  * Applies the current scheduling mode to the scheduler. It really only changes the quantum to
@@ -180,7 +214,7 @@ Kernel.contextSwitchIsr = function()
 		return;
 	}
 	
-	var nextProcess = Kernel.readyQueue.remove();
+	var nextProcess = Kernel.getNextProcess();
 	
 	Kernel.trace("Context switch: Process " + Kernel.runningProcess.pid + " -> " + nextProcess.pid);
 	
@@ -188,7 +222,7 @@ Kernel.contextSwitchIsr = function()
 	Kernel.runningProcess.status = "Ready";
 	Kernel.runningProcess.lastAccessTime = _OsClock;
 	Kernel.runningProcess.setRegisters(_CPU);
-	Kernel.readyQueue.insert(Kernel.runningProcess.schedulingPriority(), Kernel.runningProcess);
+	Kernel.readyQueue.enqueue(Kernel.runningProcess);
 	
 	// Dequeue next process and start execution.
 	Kernel.runningProcess = nextProcess;

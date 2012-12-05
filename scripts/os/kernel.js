@@ -45,7 +45,7 @@ Kernel.bootstrap = function() // Page 8.
     
     // Process Lists/Queues
     Kernel.residentList = new Array();
-    Kernel.readyQueue = new PriorityMinQueue();
+    Kernel.readyQueue = new Queue();
     
     // Initialize the Console.
     _Console = new Console(Control.getCanvas());
