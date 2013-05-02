@@ -244,7 +244,7 @@ Kernel.systemCallIsr = function(param)
 		_StdIn.putText("" + _CPU.yReg.data);
 	else if (param == 2)
 	{
-		var address = _CPU.yReg.data;
+		var address = _CPU.yReg.getUnsignedData();
 		var data = null;
 		
 		while (data !== 0)

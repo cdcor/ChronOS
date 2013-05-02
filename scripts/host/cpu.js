@@ -320,6 +320,8 @@ Cpu.toTwosComplement = function(decimal)
 {
 	if (decimal < 0)
 	{
+	    // TODO find a better way to do this.
+	    
 		// Invert the bits and convert to binary.
 		var decStr = (~decimal).toString(2);
 		
@@ -367,6 +369,11 @@ function Register()
 	// The status of the register (for display purposes).
 	this.status = Register.STATUS_NORMAL;
 }
+
+Register.prototype.getUnsignedData = function()
+{
+    return this.data < 0 ? this.data + MEMORY_BLOCK_SIZE : this.data;
+};
 
 /**
  * Returns the register's current value.
