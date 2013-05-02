@@ -189,8 +189,18 @@ Cpu.prototype.compareXReg = function() // EC
 
 Cpu.prototype.branchIfZero = function() // D0
 {
-	if (this.zFlag.read() == 0)
-		this.pc.increment(Cpu.toDecimal(this.readFromMemory(1)));
+	if (this.zFlag.read() == 0) 
+	{
+	    // Original method: use two's complement to branch
+	    //this.pc.increment(Cpu.toDecimal(this.readFromMemory(1)));
+	    
+	    // Subtract memory block size if branch causes PC >= memory block size
+	    this.pc.increment(this.readFromMemory(1));
+	    
+	    if (this.pc.data >= MEMORY_BLOCK_SIZE) {
+	        this.pc.increment(-MEMORY_BLOCK_SIZE);
+	    }
+	}
 	else
 		this.pc.increment();
 };
@@ -389,8 +399,7 @@ Register.prototype.increment = function(amount)
 {
 	this.status = Register.STATUS_WRITTEN;
 	
-	if (amount == null)
-		amount = 1;
+	amount = amount == null ? 1 : amount;
 	
 	this.data += amount;
 };

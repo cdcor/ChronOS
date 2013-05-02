@@ -22,7 +22,7 @@ var CPU_CLOCK_INTERVAL = 100;   // in ms, or milliseconds, so 1000 = 1 second.
 var MEMORY_SIZE = 768; // In bytes
 var MEMORY_BLOCK_SIZE = 256; // Block of memory to assign to a process, ideally should be a factor of MEMORY_SIZE.
 
-var MEMORY_DISPLAY_ADDRESSES_PER_LINE = 6; // Addresses per line to display.
+var MEMORY_DISPLAY_ADDRESSES_PER_LINE = 8; // Addresses per line to display.
 
 // IRQs
 var TIMER_IRQ    = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority). 
