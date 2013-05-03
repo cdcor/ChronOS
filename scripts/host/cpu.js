@@ -278,9 +278,6 @@ Cpu.prototype.readFromMemory = function(numValues)
 	}
 };
 
-// Helper map to invert the bits of a binary number
-Cpu.inversionMap = { 0 : 1, 1 : 0 };
-
 /**
  * Converts the given number (an 8-bit integer) in two's complement to its decimal form.
  * 
@@ -290,23 +287,7 @@ Cpu.inversionMap = { 0 : 1, 1 : 0 };
  */
 Cpu.toDecimal = function(twosComplement)
 {
-	if (twosComplement > 127)
-	{
-		// Convert to binary.
-		var compStr = twosComplement.toString(2);
-		
-		// Invert the bits.
-		var convertedStr = "";
-		
-		for (var i = 0; i < compStr.length; i++)
-			convertedStr += Cpu.inversionMap[compStr[i]];
-		
-		return -(parseInt(convertedStr, 2) + 1);
-	}
-	else
-	{
-		return twosComplement;
-	}
+    return fromTwosComplement(twosComplement);
 };
 
 /**
@@ -318,29 +299,7 @@ Cpu.toDecimal = function(twosComplement)
  */
 Cpu.toTwosComplement = function(decimal)
 {
-	if (decimal < 0)
-	{
-	    // TODO find a better way to do this.
-	    
-		// Invert the bits and convert to binary.
-		var decStr = (~decimal).toString(2);
-		
-		// Extend to 8 bits
-		for (var i = decStr.length; i < 8; i++)
-			decStr = "0" + decStr;
-		
-		// Invert the bits
-		var convertedStr = "";
-		
-		for (var j = 0; j < decStr.length; j++)
-			convertedStr += Cpu.inversionMap[decStr[j]];
-		
-		return parseInt(convertedStr, 2);
-	}
-	else
-	{
-		return decimal;
-	}
+    return toTwosComplement(decimal);
 };
 
 /**
