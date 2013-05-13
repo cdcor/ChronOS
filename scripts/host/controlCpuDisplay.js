@@ -26,7 +26,7 @@ CpuDisplay.update = function()
 
 CpuDisplay.updateElement = function(element, register)
 {
-	var data = Cpu.toTwosComplement(register.data).toString(16).toUpperCase();
+	var data = toTwosComplement(register.data, 1, true).toString(16).toUpperCase();
 	
 	for (var i = data.length; i < 2; i++)
 		data = "0" + data;

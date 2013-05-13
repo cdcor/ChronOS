@@ -64,12 +64,12 @@ function rot13(str)     // An easy-to understand implementation of the famous an
  * @param {Number} numberBytes the number of bytes representing the number (defaults to 1 if not
  *     specified)
  */
-function toTwosComplement(integer, numberBytes) 
+function toTwosComplement(integer, numberBytes, dontCheckRange) 
 {    
     var numberBits = (numberBytes || 1) * 8;
     
     // Ensure it's in range given the number of bits
-    if (integer < (-(1 << (numberBits - 1))) || integer > ((1 << (numberBits - 1)) - 1))
+    if (!dontCheckRange && (integer < (-(1 << (numberBits - 1))) || integer > ((1 << (numberBits - 1)) - 1))) 
         throw "Integer out of range given " + numberBytes + " byte(s) to represent.";
     
     // If positive, return the positive value
@@ -109,7 +109,7 @@ function fromTwosComplement(twosComplement, numberBytes)
 {   
     var numberBits = (numberBytes || 1) * 8;
     
-    if (twosComplement < 0 || twosComplement > Math.pow(2, numberBits) - 1)
+    if (twosComplement < 0 || twosComplement > (1 << numberBits) - 1)
         throw "Two's complement out of range given " + numberBytes + " byte(s) to represent.";
     
     // If less than the maximum positive: 2^(n-1)-1, the number stays positive
