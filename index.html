@@ -2,231 +2,25 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    <meta name="author" content="Alan G. Labouseur, Christopher D. Cordisco" />
+    <meta name="author" content="Christopher D. Cordisco" />
     
-    <title>ChronOS 0.1 - a Browser-based virtual Operating System</title>
+    <title>ChronOS 0.2</title>
+    
+    <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
     
     <link rel="stylesheet" href="main.css" type="text/css" media="screen" />
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
     
     <!-- Supplemental -->
-    <script type="text/javascript" src="scripts/supplemental/jquery-1.8.1.min.js"></script>
-    <script type="text/javascript" src="scripts/supplemental/jquery-ui-1.8.23.custom.min.js"></script>
-    <script type="text/javascript" src="scripts/supplemental/jquery-css-transform.js"></script>
-    <script type="text/javascript" src="scripts/supplemental/rotate3Di.js"></script>
+    <script type="text/javascript" src="libs/jquery-2.0.2.min.js"></script>
     
-    <!-- Utilities -->
-    <script type="text/javascript" src="scripts/util/queue.js"></script>
-    <script type="text/javascript" src="scripts/util/priorityQueue.js"></script>
-    <script type="text/javascript" src="scripts/util/utils.js"></script>
     
-    <!-- Globals CONSTANTS and _Variables. Must included be first. -->
-    <script type="text/javascript" src="scripts/globals.js"></script>
-    
-    <!-- Host (Hardware Simulation) Routines -->
-    <script type="text/javascript" src="scripts/host/statusBar.js"></script>
-    
-    <script type="text/javascript" src="scripts/host/cpu.js"></script>
-    <script type="text/javascript" src="scripts/host/memory.js"></script>
-    <script type="text/javascript" src="scripts/host/hardDrive.js"></script>
-    
-    <script type="text/javascript" src="scripts/host/control.js"></script>
-    <script type="text/javascript" src="scripts/host/controlMode.js"></script>
-    <script type="text/javascript" src="scripts/host/controlLog.js"></script>
-    <script type="text/javascript" src="scripts/host/controlCpuDisplay.js"></script>
-    <script type="text/javascript" src="scripts/host/controlMemoryDisplay.js"></script>
-    <script type="text/javascript" src="scripts/host/controlHardDriveDisplay.js"></script>
-    <script type="text/javascript" src="scripts/host/controlReadyQueueDisplay.js"></script>
-    <script type="text/javascript" src="scripts/host/controlProgramInput.js"></script>
-    
-    <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
-    <script type="text/javascript" src="scripts/os/canvastext.js"></script>
-    <script type="text/javascript" src="scripts/os/console.js"></script>
-    <script type="text/javascript" src="scripts/os/shell.js"></script>
-    
-    <script type="text/javascript" src="scripts/os/interrupt.js"></script>
-    <script type="text/javascript" src="scripts/os/deviceDriver.js"></script>
-    <script type="text/javascript" src="scripts/os/deviceDriverKeyboard.js"></script>
-    <script type="text/javascript" src="scripts/os/file.js"></script>
-    <script type="text/javascript" src="scripts/os/deviceDriverHardDrive.js"></script>
-    
-    <script type="text/javascript" src="scripts/os/memoryManager.js"></script>
-    <script type="text/javascript" src="scripts/os/pcb.js"></script>
-    
-    <script type="text/javascript" src="scripts/os/kernel.js"></script>
-    <script type="text/javascript" src="scripts/os/scheduler.js"></script>
 </head>
 
 <body>
-    <!-- Background -->
-    <!-- <div id="backgroundAnimation" class="background"></div> -->
-    <!-- <div id="backgroundCircuit" class="background"></div> -->
-    
     <div id="mainContainer">
-    	
-    	<div id="mBanner" class="banner"></div>
-    	<div id="kBanner" class="banner"></div>
-    	
-        <!-- Header/Banner -->
-        <table id="tableBanner">
-        <tr>
-            <td>
-                <input type="button"
-                       id="btnStartOS"
-                       name="btnStartOS"
-                       class="headerButton"
-                       tabindex="0"
-                       onclick="Control.hostStart(this)"
-                />
-                <input type="button"
-                       id="btnHaltOS"
-                       name="brnHaltOS"
-                       class="headerButton"
-                       disabled="disabled"
-                       tabindex="1"
-                       onclick="Control.hostHalt(this)"
-                />            
-                <input type="button"
-                       id="btnReset"
-                       name="btnReset"
-                       class="headerButton"
-                       disabled="disabled"
-                       tabindex="2"
-                       onclick="Control.hostReset(this)"
-                />            
-                </td>
-                <td id="statusBar">
-                    <table>
-                        <tr><td id="statusText"></td></tr>
-                        <tr><td id="clock">00.00.00</td></tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-    
-        <div class="separator-h"></div>
-        <br />
         
-        <!-- Main Content -->
-        <div id="mainContent">
-        	<!-- The shell -->
-        	<div class="container">
-        		<div>Shell</div>
-        		<div id="shellContainer">
-        			<div id="kShellBackground"></div>
-        			<canvas id="display"
-	                        width="500px"
-	                        height="580px"
-	                        tabindex="3"
-	                        onfocus="_Console.toggleCursor(true)"
-	                        onblur="_Console.toggleCursor(false)">
-	                </canvas>
-        		</div>
-        	</div>
-        	<!-- Utilities -->
-        	<div id="utilsContainer" class="container">
-        		<!-- The Log -->
-        		<div>Log</div>
-        		<div id="log"></div>
-        		<!-- CPU Display -->
-        		<div id="cpuContainer">
-        			<div>CPU</div>
-        			<div id="cpuDisplay">
-        				<table id="cpuDisplayTable">
-							<tr>
-								<td>PC</td>
-								<td id="pcDisplay">0</td>
-							</tr>
-							<tr>
-								<td>ACC</td>
-								<td id="accDisplay">0</td>
-							</tr>
-							<tr>
-								<td>X</td>
-								<td id="xDisplay">0</td>
-							</tr>
-							<tr>
-								<td>Y</td>
-								<td id="yDisplay">0</td>
-							</tr>
-							<tr>
-								<td>Z</td>
-								<td id="zDisplay">0</td>
-							</tr>
-						</table>
-        			</div>
-					<div id="chkbxAutoscroll"
-					     onclick="MemoryDisplay.toggleAutoscroll()">
-					    Autoscroll
-					</div>
-					<div id="chkbxSingleStep"
-                		 onclick="Control.toggleSingleStep()">
-                		Single Step
-                	</div>
-                	<div id="btnSingleStep"
-                		 onclick="Control.clockPulse(this)">
-                		<img src="images/button-ss.png" />&nbsp;Step&nbsp;
-                	</div>
-        		</div>
-        		<!-- Memory/HDD Display -->
-        		<div id="memoryContainer">
-        			<div id="memoryHeader" onclick="Control.toggleMemoryHddDisplay()"></div>
-        			<div id="hddHeader" onclick="Control.toggleMemoryHddDisplay()"></div>
-        			<div id="hddExpandedHeader"></div>
-        			<div id="memoryDisplay"></div>
-        			<div id="hddDisplay"
-        		         <!--onblur="HardDriveDisplay.restore()"-->
-        		         tabindex="50">
-        			</div>
-        			<div id="hddOptions">
-    					<input type="button"
-    					       id="btnRefreshHdd"
-    					       title="Refresh"
-    					       class="hddButton"
-    					       onclick="HardDriveDisplay.update()"
-    					/>
-    					<br>
-    					<input type="button"
-    					       id="btnExpandHdd"
-    					       title="Expand"
-    					       class="hddButton"
-    					       onclick="HardDriveDisplay.expand()"
-    					/>
-    					<input type="button"
-    					       id="btnRestoreHdd"
-    					       title="Restore"
-    					       class="hddButton"
-    					       onclick="HardDriveDisplay.restore()"
-    					/>
-    					<!-- <img src="images/hdd-refresh.png" />
-    					<img src="images/hdd-expand.png" /> -->
-    				</div>
-        		</div>
-        		
-        		<!-- Program Input -->
-        		<div id="programInputContainer">
-	        		<div>Program Input</div>
-	        		<div id="programInputSubContainer">
-	        			<textarea id="programInput"
-		                          onkeyup="ProgramInput.verify()"
-		                          onfocus="ProgramInput.expand()"
-		                          onblur="ProgramInput.restore()">
-		                </textarea>
-	        		</div>
-        		</div>
-        		<!-- Ready Queue -->
-        		<div id="readyQueueContainer">
-        			<div>Active Processes</div>
-        			<div id="readyQueueDisplay">
-        				
-        			</div>
-        		</div>
-        	</div>
-        </div>
     </div>
-    
-    <div id="hddHoverInfo"></div>
 </body>
 
 </html>
